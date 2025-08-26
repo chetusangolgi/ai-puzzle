@@ -53,10 +53,14 @@ const DocumentSelection: React.FC<DocumentSelectionProps> = ({
   onNext 
 }) => {
   const [hoveredDocument, setHoveredDocument] = useState<string | null>(null);
+  const [clickedDocument, setClickedDocument] = useState<string | null>(null);
 
   const handleDocumentSelect = (document: SelectedDocument) => {
     setSelectedDocument(document);
-    onNext();
+    setClickedDocument(document.id);
+    setTimeout(() => {
+      onNext();
+    }, 1000);
   };
 
   return (
@@ -82,15 +86,18 @@ const DocumentSelection: React.FC<DocumentSelectionProps> = ({
                 onClick={() => handleDocumentSelect(document)}
                 onMouseEnter={() => setHoveredDocument(document.id)}
                 onMouseLeave={() => setHoveredDocument(null)}
-                className={`cursor-pointer transition-all duration-300  ${
-                  selectedDocument?.id === document.id
+                className={`cursor-pointer transition-all duration-300 ${
+                  clickedDocument === document.id
+                    ? 'ring-4 ring-blue-400 ring-opacity-80 transform scale-105 shadow-xl'
+                    : hoveredDocument === document.id || selectedDocument?.id === document.id
                     ? 'ring-4 ring-blue-400 ring-opacity-60'
                     : 'hover:ring-2 hover:ring-white hover:ring-opacity-50'
                 }`}
+                disabled={clickedDocument !== null}
               >
                 <img 
                   src={
-                    hoveredDocument === document.id || selectedDocument?.id === document.id
+                    hoveredDocument === document.id || selectedDocument?.id === document.id || clickedDocument === document.id
                       ? getHoverImage(document.id)
                       : document.icon
                   }
@@ -109,15 +116,18 @@ const DocumentSelection: React.FC<DocumentSelectionProps> = ({
                 onClick={() => handleDocumentSelect(document)}
                 onMouseEnter={() => setHoveredDocument(document.id)}
                 onMouseLeave={() => setHoveredDocument(null)}
-                className={`cursor-pointer transition-all duration-300  ${
-                  selectedDocument?.id === document.id
+                className={`cursor-pointer transition-all duration-300 ${
+                  clickedDocument === document.id
+                    ? 'ring-4 ring-blue-400 ring-opacity-80 transform scale-105 shadow-xl'
+                    : hoveredDocument === document.id || selectedDocument?.id === document.id
                     ? 'ring-4 ring-blue-400 ring-opacity-60'
                     : 'hover:ring-2 hover:ring-white hover:ring-opacity-50'
                 }`}
+                disabled={clickedDocument !== null}
               >
                 <img 
                   src={
-                    hoveredDocument === document.id || selectedDocument?.id === document.id
+                    hoveredDocument === document.id || selectedDocument?.id === document.id || clickedDocument === document.id
                       ? getHoverImage(document.id)
                       : document.icon
                   }

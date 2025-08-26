@@ -1,207 +1,287 @@
-import React, { useState, useEffect } from 'react';
-import { getStackComponentsForDocument, StackComponent, DragOption, Parameter } from '../utils/stackData';
-import { CheckCircle, AlertCircle } from 'lucide-react';
-import { SelectedDocument } from '../App';
+"use client"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import { getStackComponentsForDocument, type StackComponent, type DragOption, type Parameter } from "../utils/stackData"
+import { CheckCircle } from "lucide-react"
+import type { SelectedDocument } from "../App"
 
 interface StackBuilderProps {
-  selectedDocument: SelectedDocument | null;
-  onNext: () => void;
+  selectedDocument: SelectedDocument | null
+  onNext: () => void
 }
 
 const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext }) => {
-  const [components, setComponents] = useState<StackComponent[]>([]);
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
-  const [totalFilled, setTotalFilled] = useState(0);
-  const [totalParameters, setTotalParameters] = useState(0);
-  const [selectedParameter, setSelectedParameter] = useState<Parameter | null>(null);
+  const [components, setComponents] = useState<StackComponent[]>([])
+  const [draggedItem, setDraggedItem] = useState<string | null>(null)
+  const [totalFilled, setTotalFilled] = useState(0)
+  const [totalParameters, setTotalParameters] = useState(0)
+  const [selectedParameter, setSelectedParameter] = useState<Parameter | null>(null)
 
   useEffect(() => {
     if (selectedDocument) {
-      const initialComponents = getStackComponentsForDocument(selectedDocument.id);
-      setComponents(initialComponents);
-      
+      const initialComponents = getStackComponentsForDocument(selectedDocument.id)
+      setComponents(initialComponents)
+
       // Calculate total parameters based on available options
       const totalParams = initialComponents.reduce((count, component) => {
-        return count + component.parameters.length;
-      }, 0);
-      setTotalParameters(totalParams);
+        return count + component.parameters.length
+      }, 0)
+      setTotalParameters(totalParams)
     }
-  }, [selectedDocument]);
+  }, [selectedDocument])
 
   useEffect(() => {
     const filledCount = components.reduce((count, component) => {
-      return count + component.parameters.filter(param => param.filled).length;
-    }, 0);
-    setTotalFilled(filledCount);
+      return count + component.parameters.filter((param) => param.filled).length
+    }, 0)
+    setTotalFilled(filledCount)
 
     if (filledCount === totalParameters && totalParameters > 0) {
-      setTimeout(() => onNext(), 1000);
+      setTimeout(() => onNext(), 1000)
     }
-  }, [components, onNext, totalParameters]);
+  }, [components, onNext, totalParameters])
 
   const handleDragStart = (e: React.DragEvent, optionId: string) => {
-    setDraggedItem(optionId);
-    e.dataTransfer.effectAllowed = 'move';
-  };
+    setDraggedItem(optionId)
+    e.dataTransfer.effectAllowed = "move"
+  }
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+  }
 
   const handleDrop = (e: React.DragEvent, parameterId: string) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    if (!draggedItem) return;
+    if (!draggedItem) return
 
-    let draggedOption: DragOption | undefined;
+    let draggedOption: DragOption | undefined
     for (const component of components) {
       for (const param of component.parameters) {
-        const option = param.options.find(opt => opt.id === draggedItem);
+        const option = param.options.find((opt) => opt.id === draggedItem)
         if (option) {
-          draggedOption = option;
-          break;
+          draggedOption = option
+          break
         }
       }
-      if (draggedOption) break;
+      if (draggedOption) break
     }
 
-    if (!draggedOption) return;
+    if (!draggedOption) return
 
     // Check if the option is correct for this parameter
     if (draggedOption.targetParameter === parameterId && draggedOption.isCorrect) {
       // Update the component parameter
-      setComponents(prev => prev.map(component => ({
-        ...component,
-        parameters: component.parameters.map(param =>
-          param.id === parameterId
-            ? { ...param, filled: true }
-            : param
-        )
-      })));
-      setSelectedParameter(null); // Hide the options block after a successful drop
+      setComponents((prev) =>
+        prev.map((component) => ({
+          ...component,
+          parameters: component.parameters.map((param) =>
+            param.id === parameterId ? { ...param, filled: true } : param,
+          ),
+        })),
+      )
+      setSelectedParameter(null) // Hide the options block after a successful drop
     }
 
-    setDraggedItem(null);
-  };
+    setDraggedItem(null)
+  }
 
-  const progress = totalParameters > 0 ? (totalFilled / totalParameters) * 100 : 0;
+  const progress = totalParameters > 0 ? (totalFilled / totalParameters) * 100 : 0
 
   if (!selectedDocument) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>
   }
 
   return (
-    <div 
-      className="min-h-screen p-4"
-      style={{
-        backgroundImage: 'url(/s03.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Title, Progress and Options */}
-          <div className="space-y-4">
-            {/* Title and Description */}
-            <div className="bg-white/90 rounded-xl p-6 shadow-lg border border-gray-100">
-              <div className="flex items-center space-x-3 mb-4">
-     
-                <h2 className="text-2xl font-bold text-gray-800">Build Your {selectedDocument.title}</h2>
-              </div>
-              <p className="text-gray-600 mb-4">Click a parameter to see the options, then drag the correct option to its matching parameter</p>
+    <div className="min-h-screen flex">
+      <div className="w-1/2 bg-gray-100 p-8">
+        {/* Dell Technologies Header */}
+        <div className="mb-8">
+          <div className="flex items-center mb-6">
+            <div className="w-1 h-16 bg-slate-800 mr-4"></div>
+            <div>
+              <h1 className="text-4xl font-light text-slate-800 mb-2">Enhance Productivity</h1>
+              <h1 className="text-4xl font-light text-slate-800">& Collaboration</h1>
+            </div>
+          </div>
+        </div>
 
-              
+        {/* Hardware Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-slate-800 mb-6">Hardware</h2>
+
+          {/* Options Panel */}
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="flex items-center mb-6">
+              <div className="w-1 h-8 bg-slate-800 mr-4"></div>
+              <h3 className="text-lg font-medium text-slate-700">Select the right solution for your stack</h3>
             </div>
 
-            {/* Options Panel */}
-            {selectedParameter && !selectedParameter.filled && (
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 animate-fade-in">
-                <h3 className="font-bold text-gray-800 mb-4 flex items-center">
-                  <AlertCircle className="w-5 h-5 mr-2 text-blue-600" />
-                  Available Options for {selectedParameter.name}
-                </h3>
-                <div className="space-y-3">
-                  {selectedParameter.options.map((option) => (
-                    <div
-                      key={option.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, option.id)}
-                      className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-move hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 hover:shadow-md"
-                    >
-                      <span className="text-sm font-medium text-gray-700">{option.text}</span>
+            {/* Hardware Options Cards */}
+            <div className="grid grid-cols-3 gap-4">
+              {selectedParameter &&
+                selectedParameter.options.map((option) => (
+                  <div
+                    key={option.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, option.id)}
+                    className="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-move hover:bg-blue-100 transition-all duration-200 hover:shadow-md"
+                  >
+                    <div className="text-center">
+                      <div className="mb-3">
+                        <img
+                          src={draggedItem === option.id ? "/hardwareafter.png" : "/hardwarebefore.png"}
+                          alt="Hardware icon"
+                          className="w-12 h-12 mx-auto"
+                        />
+                      </div>
+                      <h4 className="font-semibold text-slate-800 text-sm mb-1">{option.text}</h4>
+                      <div className="w-8 h-1 bg-slate-800 mx-auto"></div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {!selectedParameter && (
-              <div className="bg-white/80 rounded-xl p-6 shadow-lg border border-gray-100">
-                <p className="text-gray-500 text-center">Click on a parameter to see available options</p>
-              </div>
-            )}
+                  </div>
+                ))}
+
+              {/* Default hardware options when no parameter selected */}
+              {!selectedParameter && (
+                <>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="text-center">
+                      <div className="mb-3">
+                        <img src="/hardwarebefore.png" alt="Dell Pro AI PC" className="w-12 h-12 mx-auto" />
+                      </div>
+                      <h4 className="font-semibold text-slate-800 text-sm mb-1">Dell Pro AI PC</h4>
+                      <div className="w-8 h-1 bg-slate-800 mx-auto"></div>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="text-center">
+                      <div className="mb-3">
+                        <img src="/hardwarebefore.png" alt="Dell Precision AI-Ready" className="w-12 h-12 mx-auto" />
+                      </div>
+                      <h4 className="font-semibold text-slate-800 text-sm mb-1">Dell Precision AI-Ready Workstation</h4>
+                      <div className="w-8 h-1 bg-slate-800 mx-auto"></div>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="text-center">
+                      <div className="mb-3">
+                        <img src="/hardwarebefore.png" alt="Dell Pro Max" className="w-12 h-12 mx-auto" />
+                      </div>
+                      <h4 className="font-semibold text-slate-800 text-sm mb-1">Dell Pro Max with Blackwell GPUs</h4>
+                      <div className="w-8 h-1 bg-slate-800 mx-auto"></div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-1/2 bg-slate-800 p-8 relative">
+        {/* Decorative arc in top right */}
+        <div className="absolute top-0 right-0 w-64 h-64 opacity-10">
+          <svg viewBox="0 0 200 200" className="w-full h-full">
+            <path d="M 200 0 A 100 100 0 0 1 100 100 L 200 100 Z" fill="white" />
+          </svg>
+        </div>
+
+        <div className="relative z-10">
+          <div className="text-center mb-8">
+            <h2 className="text-white text-xl font-light mb-2">Drag and drop the correct components into each</h2>
+            <h2 className="text-white text-xl font-light">category to assemble your optimal AI Stack</h2>
           </div>
 
-          {/* Right Column - Parameters */}
-          <div className="space-y-4">
-            {components.map((component) => (
-              <div key={component.id} className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-center mb-4">
-                  <span className="text-2xl mr-3">{component.icon}</span>
-                  <div>
-                    <h3 className="font-bold text-gray-800">{component.name}</h3>
-                    <p className="text-sm text-gray-600">{component.description}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {component.parameters.map((param) => (
-                    <div
-                      key={param.id}
-                      className={`border-2 border-dashed rounded-lg p-4 min-h-[60px] flex items-center justify-between transition-all duration-200 cursor-pointer ${
-                        param.filled
-                          ? 'border-green-300 bg-green-50'
-                          : 'border-gray-300 hover:border-blue-300'
-                      } ${
-                        selectedParameter?.id === param.id ? 'border-blue-500 ring-2 ring-blue-200' : ''
-                      }`}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, param.id)}
-                      onClick={() => setSelectedParameter(param)}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium text-gray-700">{param.name}:</span>
-                        {param.filled && (
-                          <>
-                            <span className="text-sm text-green-700 font-semibold">
-                              {param.acceptedOption}
-                            </span>
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                          </>
-                        )}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            {components.slice(0, 3).map((component) => (
+              <div key={component.id} className="space-y-4">
+                {component.parameters.map((param) => (
+                  <div
+                    key={param.id}
+                    className={`border-2 border-dashed rounded-lg p-6 min-h-[120px] flex flex-col items-center justify-center transition-all duration-200 cursor-pointer ${
+                      param.filled ? "border-green-400 bg-green-900/20" : "border-slate-500 hover:border-blue-400"
+                    } ${selectedParameter?.id === param.id ? "border-blue-400 ring-2 ring-blue-400/30" : ""}`}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, param.id)}
+                    onClick={() => setSelectedParameter(param)}
+                  >
+                    <div className="text-center">
+                      <div className="mb-3">
+                        <img
+                          src={param.filled ? "/hardwareafter.png" : "/hardwarebefore.png"}
+                          alt={param.name}
+                          className="w-12 h-12 mx-auto opacity-60"
+                        />
                       </div>
+                      <div className="text-white text-sm">
+                        <span className="block font-medium">Drag {param.name}</span>
+                        <span className="block text-slate-300">here</span>
+                      </div>
+                      {param.filled && (
+                        <div className="mt-2">
+                          <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {components.slice(3).map((component) => (
+              <div key={component.id} className="space-y-4">
+                {component.parameters.map((param) => (
+                  <div
+                    key={param.id}
+                    className={`border-2 border-dashed rounded-lg p-6 min-h-[120px] flex flex-col items-center justify-center transition-all duration-200 cursor-pointer ${
+                      param.filled ? "border-green-400 bg-green-900/20" : "border-slate-500 hover:border-blue-400"
+                    } ${selectedParameter?.id === param.id ? "border-blue-400 ring-2 ring-blue-400/30" : ""}`}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, param.id)}
+                    onClick={() => setSelectedParameter(param)}
+                  >
+                    <div className="text-center">
+                      <div className="mb-3">
+                        <img
+                          src={param.filled ? "/hardwareafter.png" : "/hardwarebefore.png"}
+                          alt={param.name}
+                          className="w-12 h-12 mx-auto opacity-60"
+                        />
+                      </div>
+                      <div className="text-white text-sm">
+                        <span className="block font-medium">Drag {param.name}</span>
+                        <span className="block text-slate-300">here</span>
+                      </div>
+                      {param.filled && (
+                        <div className="mt-2">
+                          <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
         </div>
-
-        {totalFilled === totalParameters && totalParameters > 0 && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 text-center animate-bounce">
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">Congratulations!</h3>
-              <p className="text-gray-600">All parameters matched correctly!</p>
-            </div>
-          </div>
-        )}
       </div>
-    </div>
-  );
-};
 
-export default StackBuilder;
+      {/* Congratulations Modal */}
+      {totalFilled === totalParameters && totalParameters > 0 && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 text-center animate-bounce">
+            <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">Congratulations!</h3>
+            <p className="text-gray-600">All parameters matched correctly!</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default StackBuilder
