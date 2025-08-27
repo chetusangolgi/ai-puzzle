@@ -54,7 +54,7 @@ const allDragOptions: DragOption[] = [
   { id: 'opt-18', text: 'PowerEdge XR-Series', isCorrect: false, targetParameter: 'hardware', documentType: 'button-2' },
   { id: 'opt-19', text: 'Dell AI Factory with NVIDIA', isCorrect: true, targetParameter: 'software-ai', documentType: 'button-2' },
   { id: 'opt-20', text: 'Dell AI Data Platform & Data Lakehouse', isCorrect: false, targetParameter: 'software-ai', documentType: 'button-2' },
-  { id: 'opt-21', text: 'AI Orchestration, Management, and Automation', isCorrect: false, targetParameter: 'software-ai', documentType: 'button-2' },
+  { id: 'opt-21', text: 'AI Orchestration, Management', isCorrect: false, targetParameter: 'software-ai', documentType: 'button-2' },
   { id: 'opt-22', text: 'Dell AI Readiness Assessment', isCorrect: true, targetParameter: 'ai-services', documentType: 'button-2' },
   { id: 'opt-23', text: 'Orchestration, Cluster Automation', isCorrect: false, targetParameter: 'ai-services', documentType: 'button-2' },
   { id: 'opt-24', text: 'Professional and Managed AI Services', isCorrect: false, targetParameter: 'ai-services', documentType: 'button-2' },

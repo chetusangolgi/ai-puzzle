@@ -45,6 +45,11 @@ function App() {
     });
   }, []);
 
+  const goHome = useCallback(() => {
+    setCurrentPage(1);
+    setSelectedDocument(null);
+  }, []);
+
   const renderPage = () => {
     switch (currentPage) {
       case 1:
@@ -58,7 +63,7 @@ function App() {
       case 5:
         return <StackReady onNext={nextPage} />;
       case 6:
-        return <FinalPage userInfo={userInfo} />;
+        return <FinalPage userInfo={userInfo} selectedDocument={selectedDocument} onHome={goHome} />;
       default:
         return <StartScreen onNext={nextPage} />;
     }
