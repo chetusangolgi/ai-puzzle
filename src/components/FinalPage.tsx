@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, Mail, FileText, CheckCircle, ChevronDown, ChevronUp, Home } from 'lucide-react';
+import { ChevronDown, ChevronUp, Home } from 'lucide-react';
 import { UserInfo } from '../App';
 import { getStackComponentsForDocument } from '../utils/stackData';
 
@@ -10,11 +10,8 @@ interface FinalPageProps {
 }
 
 const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHome }) => {
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [expandedOption, setExpandedOption] = useState<number | null>(null);
 
-  // Get the correct options for the selected document
   const getCorrectOptions = () => {
     if (!selectedDocument) return [];
     
@@ -68,54 +65,43 @@ const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHom
     return descriptions[optionName] || "Detailed information about this solution is coming soon.";
   };
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setIsSubmitted(true);
-      // In a real app, you would send the email to a backend service
-      console.log('Email submitted:', email);
-    }
-  };
-
   return (
     <div 
-      className="min-h-screen p-4 bg-cover bg-center bg-no-repeat"
+      className="min-h-screen p-4 bg-cover bg-center bg-no-repeat relative overflow-hidden" // Added overflow-hidden to the root
       style={{
         backgroundImage: 'url(/s05.png)'
       }}
     >
       <div className="h-full flex justify-end relative">
-        {/* Frame image in bottom left */}
-        <div className="absolute -bottom-[18rem] left-20">
+        <div className="fixed bottom-32 left-24"> {/* Changed to fixed */}
           <img 
             src="/frame.png" 
             alt="Frame" 
             className="w-auto h-auto"
           />
-          {/* Home button below frame */}
-          <div className="flex  mt-36 -ml-4">
+          <div className="flex mt-36 -ml-4">
             <button
               onClick={onHome}
               className="flex items-center justify-center bg-[#1D2C3B] text-white text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               style={{ width: '287px', height: '58px' }}
             >
-              
               <span className="font-medium">Home</span>
             </button>
           </div>
         </div>
         
-        
-        <div className="w-2/5 p-8 flex items-center">
+        {/* Right side container */}
+        <div className="w-2/5 p-8 flex flex-col justify-center">
           <div className="ml-20 mr-20">
             <h1 className="text-4xl mb-8 text-white mt-28">Your chosen AI stack is powered by these solutions.</h1>
             
-            {/* Parameter Result Blocks */}
-            <div className="space-y-4">
+            {/* Scrollable container for the blocks */}
+            {/* Adjusted max-h-screen to ensure it takes full available height if needed */}
+            <div className="space-y-4 overflow-y-auto max-h-[calc(100vh-20rem)] pr-4"> 
               {correctOptions.map((option, index) => (
                 <div 
                   key={index}
-                  className="p-4 "
+                  className="p-4 relative" // Kept relative for dropdown content
                   style={{ backgroundColor: '#C5D4E3' }}
                 >
                   <div 
@@ -132,7 +118,7 @@ const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHom
                     )}
                   </div>
                   {expandedOption === index && (
-                    <div className="mt-3">
+                    <div className="mt-3"> {/* Removed absolute positioning */}
                       <p className="text-slate-800 leading-relaxed">
                         {getOptionDescription(option.correctOption)}
                       </p>
@@ -144,7 +130,6 @@ const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHom
           </div>
         </div>
       </div>
-     
     </div>
   );
 };
