@@ -17,6 +17,29 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
   const [totalFilled, setTotalFilled] = useState(0)
   const [totalParameters, setTotalParameters] = useState(0)
   const [selectedParameter, setSelectedParameter] = useState<Parameter | null>(null)
+  const [dragOverParameter, setDragOverParameter] = useState<string | null>(null)
+
+  // Map parameter types to their respective before images
+  const getBeforeImage = (parameterName: string) => {
+    const normalizedName = parameterName.toLowerCase()
+    if (normalizedName.includes('hardware')) return '/before/hardware.png'
+    if (normalizedName.includes('software')) return 'before/software.png'
+    if (normalizedName.includes('service')) return 'before/service.png'
+    if (normalizedName.includes('security')) return 'before/security.png'
+    if (normalizedName.includes('edge') || normalizedName.includes('deployment')) return 'before/deployment.png'
+    return '/hardwarebefore.png' // fallback
+  }
+
+  // Map parameter types to their respective after images
+  const getAfterImage = (parameterName: string) => {
+    const normalizedName = parameterName.toLowerCase()
+    if (normalizedName.includes('hardware')) return 'after/hardware.png'
+    if (normalizedName.includes('software')) return 'after/software.png'
+    if (normalizedName.includes('service')) return 'after/service.png'
+    if (normalizedName.includes('security')) return 'after/security.png'
+    if (normalizedName.includes('edge') || normalizedName.includes('deployment')) return 'after/deployment.png'
+    return '/hardwareafter.png' // fallback
+  }
 
   useEffect(() => {
     if (selectedDocument) {
@@ -47,9 +70,16 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
     e.dataTransfer.effectAllowed = "move"
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, parameterId?: string) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "move"
+    if (parameterId) {
+      setDragOverParameter(parameterId)
+    }
+  }
+
+  const handleDragLeave = () => {
+    setDragOverParameter(null)
   }
 
   const handleDrop = (e: React.DragEvent, parameterId: string) => {
@@ -86,6 +116,7 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
     }
 
     setDraggedItem(null)
+    setDragOverParameter(null)
   }
 
   const progress = totalParameters > 0 ? (totalFilled / totalParameters) * 100 : 0
@@ -98,19 +129,19 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
     <div className="min-h-screen flex">
       <div className="w-1/2 bg-gray-100 p-8">
         {/* Dell Technologies Header */}
-        <div className="mb-8">
+        <div className="mb-20 mt-40">
           <div className="flex items-center mb-6">
-            <div className="w-1 h-16 bg-slate-800 mr-4"></div>
+            <div className="w-5 h-40 bg-slate-800 mr-10"></div>
             <div>
-              <h1 className="text-4xl font-light text-slate-800 mb-2">Enhance Productivity</h1>
-              <h1 className="text-4xl font-light text-slate-800">& Collaboration</h1>
+              <h1 className="text-7xl font-light text-slate-800 mb-2">Enhance Productivity</h1>
+              <h1 className="text-7xl font-light text-slate-800">& Collaboration</h1>
             </div>
           </div>
         </div>
 
         {/* Hardware Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-800 mb-6">Hardware</h2>
+          <h2 className="text-6xl font-semibold text-slate-800 mb-20">Hardware</h2>
 
           {/* Options Panel */}
           <div className="bg-white rounded-lg p-6 shadow-sm">
@@ -132,8 +163,7 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
                     <div className="text-center">
                       <div className="mb-3">
                         <img
-                          src={draggedItem === option.id ? "/hardwareafter.png" : "/hardwarebefore.png"}
-                          alt="Hardware icon"
+                          src={draggedItem === option.id ? getAfterImage(selectedParameter.name) : getBeforeImage(selectedParameter.name)}
                           className="w-12 h-12 mx-auto"
                         />
                       </div>
@@ -194,76 +224,47 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
             <h2 className="text-white text-xl font-light">category to assemble your optimal AI Stack</h2>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {components.slice(0, 3).map((component) => (
-              <div key={component.id} className="space-y-4">
-                {component.parameters.map((param) => (
-                  <div
-                    key={param.id}
-                    className={`border-2 border-dashed rounded-lg p-6 min-h-[120px] flex flex-col items-center justify-center transition-all duration-200 cursor-pointer ${
-                      param.filled ? "border-green-400 bg-green-900/20" : "border-slate-500 hover:border-blue-400"
-                    } ${selectedParameter?.id === param.id ? "border-blue-400 ring-2 ring-blue-400/30" : ""}`}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, param.id)}
-                    onClick={() => setSelectedParameter(param)}
-                  >
-                    <div className="text-center">
-                      <div className="mb-3">
+          <div className="grid grid-cols-3 grid-rows-2 gap-4">
+            {components[0]?.parameters.map((param) => (
+              <div
+                key={param.id}
+                className={`transition-all duration-200 cursor-pointer relative flex flex-row items-center justify-center border-2 border-dashed rounded-lg p-6 min-h-[120px] ${
+                  param.filled ? "border-green-400 bg-green-900/20" : "border-slate-500 hover:border-blue-400"
+                } ${selectedParameter?.id === param.id ? "border-blue-400 ring-2 ring-blue-400/30" : ""} ${
+                  dragOverParameter === param.id ? "ring-4 ring-blue-400/50 border-blue-400" : ""
+                }`}
+                onDragOver={(e) => handleDragOver(e, param.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, param.id)}
+                onClick={() => setSelectedParameter(param)}
+              >
+                <div className="text-center">
+                  <div className="mb-3 relative">
+                    <img
+                      src={param.filled ? getAfterImage(param.name) : getBeforeImage(param.name)}
+                      alt={param.name}
+                      className="w-12 h-12 mx-auto opacity-60"
+                    />
+                    {dragOverParameter === param.id && draggedItem && (
+                      <div className="absolute inset-0 flex items-center justify-center">
                         <img
-                          src={param.filled ? "/hardwareafter.png" : "/hardwarebefore.png"}
+                          src={getAfterImage(param.name)}
                           alt={param.name}
-                          className="w-12 h-12 mx-auto opacity-60"
+                          className="w-12 h-12 mx-auto opacity-80 animate-pulse"
                         />
                       </div>
-                      <div className="text-white text-sm">
-                        <span className="block font-medium">Drag {param.name}</span>
-                        <span className="block text-slate-300">here</span>
-                      </div>
-                      {param.filled && (
-                        <div className="mt-2">
-                          <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {components.slice(3).map((component) => (
-              <div key={component.id} className="space-y-4">
-                {component.parameters.map((param) => (
-                  <div
-                    key={param.id}
-                    className={`border-2 border-dashed rounded-lg p-6 min-h-[120px] flex flex-col items-center justify-center transition-all duration-200 cursor-pointer ${
-                      param.filled ? "border-green-400 bg-green-900/20" : "border-slate-500 hover:border-blue-400"
-                    } ${selectedParameter?.id === param.id ? "border-blue-400 ring-2 ring-blue-400/30" : ""}`}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, param.id)}
-                    onClick={() => setSelectedParameter(param)}
-                  >
-                    <div className="text-center">
-                      <div className="mb-3">
-                        <img
-                          src={param.filled ? "/hardwareafter.png" : "/hardwarebefore.png"}
-                          alt={param.name}
-                          className="w-12 h-12 mx-auto opacity-60"
-                        />
-                      </div>
-                      <div className="text-white text-sm">
-                        <span className="block font-medium">Drag {param.name}</span>
-                        <span className="block text-slate-300">here</span>
-                      </div>
-                      {param.filled && (
-                        <div className="mt-2">
-                          <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
-                        </div>
-                      )}
-                    </div>
+                  <div className="text-white text-sm">
+                    <span className="block font-medium">Drag {param.name}</span>
+                    <span className="block text-slate-300">here</span>
                   </div>
-                ))}
+                  {param.filled && (
+                    <div className="mt-2">
+                      <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
