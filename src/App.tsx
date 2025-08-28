@@ -61,7 +61,7 @@ function App() {
       case 4:
         return <StackBuilder selectedDocument={selectedDocument} onNext={nextPage} />;
       case 5:
-        return <StackReady onNext={nextPage} />;
+        return <StackReady selectedDocument={selectedDocument} onNext={nextPage} />;
       case 6:
         return <FinalPage userInfo={userInfo} selectedDocument={selectedDocument} onHome={goHome} />;
       default:
