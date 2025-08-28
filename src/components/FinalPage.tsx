@@ -32,35 +32,26 @@ const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHom
 
   const getOptionDescription = (optionName: string) => {
     const descriptions: { [key: string]: string } = {
-      "Dell Pro AI PC": "Advanced AI-ready personal computer designed for productivity workflows with built-in AI acceleration and enhanced processing power.",
-      "Microsoft 365 Copilot": "AI-powered productivity assistant integrated across Microsoft Office applications, helping automate tasks and enhance collaboration.",
-      "Dell AI Readiness Assessment": "Comprehensive evaluation service to determine your organization's readiness for AI implementation and provide strategic recommendations.",
-      "Trend Micro AI Security": "Advanced AI-driven cybersecurity solution that provides real-time threat detection and automated response capabilities.",
-      "Dell Edge Gateway": "Industrial IoT gateway solution enabling secure edge computing and data processing at the network edge.",
+      "Dell Pro AI PC": "A sleek, AI-optimized workstation built for hybrid and remote work. Powered by on-chip AI, it enhances multitasking, offers smart video conferencing features, and optimizes workflows with AI-assisted task handling—all while maintaining enterprise-grade security and manageability.",
+      "Microsoft 365 Copilot": "Integrated directly into the Microsoft 365 suite, Copilot brings AI-enhanced productivity to apps like Word, Excel, Teams, and PowerPoint. It helps automate content creation, generate insightful summaries, and foster smarter collaboration across your organization.",
+      "Dell AI Readiness Assessment": "A structured diagnostic to assess your organization's preparedness for AI adoption. It identifies quick-win use cases, highlights capability gaps, and develops a roadmap that accelerates AI implementation with minimal disruption.",
+      "Trend Micro AI Security": "A robust, AI-driven security suite that protects collaboration platforms and data exchanges from threats in real time. It ensures safe, uninterrupted productivity—especially critical in hybrid work environments.",
+      "Dell Edge Gateway": "Enables real-time data processing and secure AI-enabled applications at the network edge. Ideal for supporting distributed teams and ensuring low-latency collaboration—even in remote or bandwidth-limited environments.",
       "PowerEdge XE-Series": "High-performance edge servers optimized for harsh environments and AI workloads at the network edge.",
       "Dell AI Factory with NVIDIA": "Complete AI infrastructure solution combining Dell hardware with NVIDIA accelerated computing for enterprise AI development.",
       "Hardware-Level Security": "Built-in security features at the hardware level providing root of trust and protection against firmware attacks.",
-      "Dell Pro Max AI PC": "Premium AI-enabled workstation with maximum performance capabilities for demanding AI and machine learning workloads.",
-      "Dell Pro AI Studio": "Integrated development environment and toolkit for AI application development and deployment.",
-      "Dell Professional Services for AI": "Expert consulting and implementation services to help organizations successfully deploy AI solutions.",
-      "Data Governance Toolkit": "Comprehensive set of tools and policies for managing data quality, compliance, and governance in AI initiatives.",
-      "Streaming Analytics at Edge": "Real-time data processing and analytics capabilities deployed at edge locations for immediate insights.",
-      "Dell Pro Max with Blackwell GPUs": "Ultra-high performance computing solution featuring the latest NVIDIA Blackwell GPU architecture for advanced AI workloads.",
-      "AI Threat Detection Suite": "Advanced security platform using AI and machine learning to identify and respond to cybersecurity threats in real-time.",
-      "Dell Managed AI Ops": "Fully managed AI operations service providing end-to-end management of AI infrastructure and applications.",
-      "Cyber Recovery Vault": "Isolated and secure data recovery solution designed to protect against ransomware and ensure business continuity.",
-      "Edge Inferencing Kit": "Complete hardware and software solution for deploying AI inference capabilities at edge locations.",
-      "McAfee AI Endpoint Protection": "AI-powered endpoint security solution providing advanced threat protection and behavioral analysis.",
-      "APEX Flex on Demand": "Flexible consumption model for IT infrastructure allowing organizations to scale resources based on actual usage.",
-      "Dell Precision AI-Ready Workstation": "Professional workstation optimized for AI development with certified drivers and enhanced compute capabilities.",
-      "NVIDIA AI Enterprise": "Enterprise-grade AI software suite providing tools and frameworks for developing and deploying AI applications.",
-      "Dell Accelerator Services for RAG": "Specialized services for implementing Retrieval-Augmented Generation AI systems and applications.",
-      "Dell AI Data Platform & Data Lakehouse": "Unified data platform combining data lake and warehouse capabilities optimized for AI workloads.",
-      "AI Orchestration, Management, and Automation": "Platform for managing and orchestrating AI workflows, models, and infrastructure at enterprise scale.",
-      "Orchestration, Cluster Automation": "Automated management and orchestration of computing clusters for efficient resource utilization.",
-      "Professional and Managed AI Services": "Comprehensive professional services including consulting, implementation, and ongoing management of AI solutions.",
-      "Data Platform Protection": "Security solutions specifically designed to protect data platforms and ensure data integrity in AI environments.",
-      "Network Security & Compliance Framework": "Comprehensive security framework ensuring network protection and regulatory compliance for AI deployments."
+      "Dell Pro Max AI PC": "A high-performance AI PC designed for analytics-heavy workflows. It accelerates data insights with powerful processing and robust AI-assisted decision support.",
+      "Dell Pro AI Studio": "An all-in-one development environment for AI workflows on Dell PCs. It brings pre-configured tools, frameworks, and models to your desktop—streamlining AI experimentation and deployment.",
+      "Dell Professional Services for AI": "Strategic consulting to custom-build AI solutions tailored to your business objectives. Dell's experts guide implementation, from ideation to deployment and optimization.",
+      "Data Governance Toolkit": "Tools and frameworks that ensure AI-driven decisions comply with governance standards and ethical guidelines. It embeds control and transparency into your AI workflows.",
+      "Streaming Analytics at Edge": "Analytics platform optimized for processing real-time data at the edge. Enables faster, contextual decision-making by analyzing insights where data is generated.",
+      "Dell Pro Max with Blackwell GPUs": "A powerhouse desktop designed for AI workloads, built around NVIDIA's Blackwell architecture. It delivers accelerated AI inference and threat analytics with unmatched performance.",
+      "AI Threat Detection Suite": "AI-augmented software to detect anomalies and security threats proactively. It adds a smart, responsive layer to traditional IT defense systems.",
+      "Dell Managed AI Ops": "Continuous monitoring, optimization, and orchestration of AI pipelines to ensure both performance and security. It abstracts the complexity of running AI at scale.",
+      "Cyber Recovery Vault": "Secure, isolated backup architecture—ideal for protection against ransomware and data loss risks. Ensures rapid recovery without compromising AI system integrity.",
+      "Edge Inferencing Kit": "A toolkit optimized for deploying AI inference at the network edge—enabling instant threat response in connected environments like retail, manufacturing, or remote sites.",
+      "McAfee AI Endpoint Protection": "AI-powered endpoint protection securing remote and hybrid devices against evolving threats.",
+      "APEX Flex on Demand": "A flexible infrastructure service offering pay-per-use access to AI workloads. It allows scaling compute resources up or down dynamically—perfect for variable training needs."
     };
     return descriptions[optionName] || "Detailed information about this solution is coming soon.";
   };
@@ -85,7 +76,7 @@ const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHom
               className="flex items-center justify-center bg-[#1D2C3B] text-white text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               style={{ width: '287px', height: '58px' }}
             >
-              <span className="font-medium">Home</span>
+              <span className="font-large">Home</span>
             </button>
           </div>
         </div>
@@ -108,7 +99,7 @@ const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHom
                     className="flex justify-between items-center cursor-pointer"
                     onClick={() => toggleDropdown(index)}
                   >
-                    <p className="text-slate-800 text-lg">
+                    <p className="text-slate-800 text-xl">
                       {option.correctOption}
                     </p>
                     {expandedOption === index ? (

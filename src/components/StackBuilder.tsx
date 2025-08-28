@@ -80,7 +80,7 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
     setTotalFilled(filledCount)
 
     if (filledCount === totalParameters && totalParameters > 0) {
-      setTimeout(() => onNext(), 1000)
+      onNext()
     }
   }, [components, onNext, totalParameters])
 
@@ -357,7 +357,7 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
                     // Show the dropped option card
                     <div style={{ backgroundColor: '#C5D4E3' }} className="border border-blue-200 rounded-lg p-4 w-full h-full">
                       <div className="h-full flex flex-col justify-between">
-                        <h4 className="text-2xl font-thin text-left">{droppedOptions[param.id].text}</h4>
+                        <h4 className="text-3xl font-thin text-left">{droppedOptions[param.id].text}</h4>
                         <div className="w-8 h-1 bg-slate-800"></div>
                       </div>
                     </div>
