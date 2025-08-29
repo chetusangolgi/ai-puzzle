@@ -371,7 +371,7 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
                         onClick={() => handleOptionClick(option.id, `${option.id}-${index}`)}
                         onDragStart={(e) => handleDragStart(e, option.id)}
                         draggable
-                        className={`falling-option border border-blue-200 rounded-lg p-4 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 touch-manipulation select-none ${
+                        className={`falling-option border border-blue-200 rounded-lg p-4 cursor-pointer transition-all duration-300 touch-manipulation select-none ${
                           wrongClick === `${option.id}-${index}` ? "bg-red-500 animate-pulse" : ""
                         }`}
                         style={{
@@ -476,7 +476,7 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
                   <img
                     src={block.imageUrl || "/placeholder.svg"}
                     alt={`Block ${index + 1}`}
-                    className="w-full h-full rounded-sm shadow-lg"
+                    className="w-full h-full"
                   />
                 </div>
               )
