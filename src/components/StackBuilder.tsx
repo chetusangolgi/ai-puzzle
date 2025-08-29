@@ -338,17 +338,17 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
           
           @keyframes smoothFall {
             0% { 
-              transform: translateY(-300px) translateX(0px); 
+              transform: translateY(-400px);
               opacity: 0;
             }
-            10% { 
+            5% { 
               opacity: 1;
             }
-            90% { 
+            95% { 
               opacity: 1;
             }
             100% { 
-              transform: translateY(400px) translateX(0px); 
+              transform: translateY(700px);
               opacity: 0;
             }
           }
@@ -357,6 +357,8 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
             animation: smoothFall linear infinite;
             position: absolute;
             z-index: 10;
+            opacity: 0;
+            transform: translateY(-400px);
           }
         `}
       </style>
@@ -383,7 +385,7 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
 
       <div className="flex flex-1">
         {/* Left side - Options above, Parameters below */}
-        <div className="w-4/5 p-8 flex flex-col justify-between">
+        <div className="w-3.5/5 p-8 flex flex-col justify-between">
           {/* Hardware Section */}
           <div className="flex-1 flex flex-col justify-center">
             {/* Options Panel */}
@@ -396,25 +398,29 @@ const StackBuilder: React.FC<StackBuilderProps> = ({ selectedDocument, onNext })
               {/* Hardware Options Cards - Falling Animation */}
               <div className="relative w-full h-full">
                 {selectedParameter &&
-                  Array.from({ length: 9 }, (_, index) => {
+                  Array.from({ length: 6 }, (_, index) => {
                     const optionIndex = index % selectedParameter.options.length
                     const option = selectedParameter.options[optionIndex]
-                    const columnWidth = 100 / 9 // Divide full width into 9 columns
+                    const columnIndex = index % 3 // 3 columns
+                    const rowIndex = Math.floor(index / 3) // 2 rows
+                    const horizontalPosition = 10 + columnIndex * 35 // 10%, 45%, 80%
+                    const verticalPosition = rowIndex === 0 ? 15 : 65 // Top or bottom row
                     
                     return (
                       <div
                         key={`${option.id}-${index}`}
                         onClick={() => handleOptionClick(option.id, `${option.id}-${index}`)}
-                        className={`falling-option border border-blue-200 rounded-lg p-3 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 touch-manipulation select-none ${
+                        className={`falling-option border border-blue-200 rounded-lg p-4 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 touch-manipulation select-none ${
                           wrongClick === `${option.id}-${index}` ? "bg-red-500 animate-pulse" : ""
                         }`}
                         style={{
-                          width: `${columnWidth - 2}%`,
-                          height: '80px',
+                          width: '180px',
+                          height: '90px',
                           backgroundColor: wrongClick === `${option.id}-${index}` ? '#EF4444' : '#C5D4E3',
-                          animationDelay: `${index * 1}s`,
-                          animationDuration: '10s',
-                          left: `${index * columnWidth}%`,
+                          animationDelay: `${columnIndex * 2 + rowIndex * 6}s`,
+                          animationDuration: '12s',
+                          left: `${horizontalPosition}%`,
+                          top: `${verticalPosition}%`,
                           animationIterationCount: 'infinite'
                         }}
                       >
