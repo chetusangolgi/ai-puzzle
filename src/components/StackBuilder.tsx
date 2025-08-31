@@ -1,70 +1,13 @@
 import React from "react"
 import { useState, useEffect } from "react"
 import { CheckCircle } from "lucide-react"
+import { getStackComponentsForDocument } from '../utils/stackData'
 
-// Mock data for testing
-const mockStackData = {
-  id: "doc1",
-  name: "Dell Technologies Stack",
-  parameters: [
-    {
-      id: "hardware",
-      name: "Hardware",
-      filled: false,
-      options: [
-        { id: "opt1", text: "PowerEdge Servers", targetParameter: "hardware", isCorrect: true },
-        { id: "opt2", text: "Generic Servers", targetParameter: "hardware", isCorrect: false },
-        { id: "opt3", text: "Basic Hardware", targetParameter: "hardware", isCorrect: false }
-      ]
-    },
-    {
-      id: "software",
-      name: "Software",
-      filled: false,
-      options: [
-        { id: "opt4", text: "VMware vSphere", targetParameter: "software", isCorrect: true },
-        { id: "opt5", text: "Basic OS", targetParameter: "software", isCorrect: false },
-        { id: "opt6", text: "Generic Software", targetParameter: "software", isCorrect: false }
-      ]
-    },
-    {
-      id: "service",
-      name: "Service",
-      filled: false,
-      options: [
-        { id: "opt7", text: "ProSupport Plus", targetParameter: "service", isCorrect: true },
-        { id: "opt8", text: "Basic Support", targetParameter: "service", isCorrect: false },
-        { id: "opt9", text: "No Support", targetParameter: "service", isCorrect: false }
-      ]
-    },
-    {
-      id: "security",
-      name: "Security",
-      filled: false,
-      options: [
-        { id: "opt10", text: "CyberRecovery", targetParameter: "security", isCorrect: true },
-        { id: "opt11", text: "Basic Security", targetParameter: "security", isCorrect: false },
-        { id: "opt12", text: "No Security", targetParameter: "security", isCorrect: false }
-      ]
-    },
-    {
-      id: "deployment",
-      name: "Deployment",
-      filled: false,
-      options: [
-        { id: "opt13", text: "Edge Solutions", targetParameter: "deployment", isCorrect: true },
-        { id: "opt14", text: "Cloud Only", targetParameter: "deployment", isCorrect: false },
-        { id: "opt15", text: "On-Premise Only", targetParameter: "deployment", isCorrect: false }
-      ]
-    }
-  ]
-}
-
-const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) => {
-  const [components, setComponents] = useState([mockStackData])
+const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {} }) => {
+  const [components, setComponents] = useState([])
   const [draggedItem, setDraggedItem] = useState(null)
   const [totalFilled, setTotalFilled] = useState(0)
-  const [totalParameters, setTotalParameters] = useState(5)
+  const [totalParameters, setTotalParameters] = useState(0)
   const [selectedParameter, setSelectedParameter] = useState(null)
   const [dragOverParameter, setDragOverParameter] = useState(null)
   const [droppedOptions, setDroppedOptions] = useState({})
@@ -74,6 +17,9 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
   const [wrongClick, setWrongClick] = useState(null)
   const [successBlocks, setSuccessBlocks] = useState([])
   const [visibleBlocks, setVisibleBlocks] = useState([])
+  const [elapsedTime, setElapsedTime] = useState(0)
+  const [gameStartTime, setGameStartTime] = useState(Date.now())
+  const [randomizedOptions, setRandomizedOptions] = useState([])
 
   // Stack block images
   const blockImages = [
@@ -84,26 +30,35 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
     "/block5.png"
   ]
 
-  // Map parameter types to their respective before images
-  const getBeforeImage = (parameterName) => {
+  // Map parameter types to their respective images
+  // Active parameters (filled or currently available) use 'before' images, others use 'after' images
+  const getParameterImage = (parameterName, isActive) => {
     const normalizedName = parameterName.toLowerCase()
-    if (normalizedName.includes('hardware')) return '/before/hardware.png'
-    if (normalizedName.includes('software')) return '/before/software.png'
-    if (normalizedName.includes('service')) return '/before/service.png'
-    if (normalizedName.includes('security')) return '/before/security.png'
-    if (normalizedName.includes('edge') || normalizedName.includes('deployment')) return '/before/deployment.png'
-    return '/before/hardware.png'
+    const folder = isActive ? 'before' : 'after'
+    
+    if (normalizedName.includes('hardware')) return `/${folder}/hardware.png`
+    if (normalizedName.includes('software') || normalizedName.includes('ai platforms')) return `/${folder}/software.png`
+    if (normalizedName.includes('service') || normalizedName.includes('ai services')) return `/${folder}/service.png`
+    if (normalizedName.includes('security') || normalizedName.includes('governance')) return `/${folder}/security.png`
+    if (normalizedName.includes('edge') || normalizedName.includes('deployment')) return `/${folder}/deployment.png`
+    return `/${folder}/hardware.png`
   }
 
-  // Map parameter types to their respective after images
-  const getAfterImage = (parameterName) => {
-    const normalizedName = parameterName.toLowerCase()
-    if (normalizedName.includes('hardware')) return '/after/hardware.png'
-    if (normalizedName.includes('software')) return '/after/software.png'
-    if (normalizedName.includes('service')) return '/after/service.png'
-    if (normalizedName.includes('security')) return '/after/security.png'
-    if (normalizedName.includes('edge') || normalizedName.includes('deployment')) return '/after/deployment.png'
-    return '/after/hardware.png'
+  // Check if a parameter should be active (filled or next in sequence)
+  const isParameterActive = (param, allParameters) => {
+    if (param.filled) return true // Always active if filled
+    
+    // Get the index of current parameter
+    const currentIndex = allParameters.findIndex(p => p.id === param.id)
+    
+    // Check if all previous parameters are filled
+    for (let i = 0; i < currentIndex; i++) {
+      if (!allParameters[i].filled) {
+        return false
+      }
+    }
+    
+    return true // This parameter is next in sequence
   }
 
   // Get the next unfilled parameter
@@ -120,15 +75,116 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
 
   useEffect(() => {
     if (selectedDocument) {
-      setComponents([mockStackData])
-      setTotalParameters(5)
+      const stackComponents = getStackComponentsForDocument(selectedDocument.id)
+      setComponents(stackComponents)
+      setGameStartTime(Date.now())
       
-      // Auto-select the first parameter
-      if (mockStackData.parameters.length > 0) {
-        setSelectedParameter(mockStackData.parameters[0])
+      if (stackComponents.length > 0) {
+        setTotalParameters(stackComponents[0].parameters.length)
+        
+        // Auto-select the first parameter
+        if (stackComponents[0].parameters.length > 0) {
+          setSelectedParameter(stackComponents[0].parameters[0])
+        }
       }
     }
   }, [selectedDocument])
+
+  // Generate randomized options when selectedParameter changes
+  useEffect(() => {
+    if (selectedParameter && selectedParameter.options.length > 0) {
+      const colors = ['#0672CB', '#0B7C84', '#66278F']
+      
+      // Assign consistent colors to each unique option
+      const optionColorMap = {}
+      selectedParameter.options.forEach((option, index) => {
+        optionColorMap[option.id] = colors[index % colors.length]
+      })
+      
+      // Create truly random falling options with proper spacing
+      const newRandomizedOptions = []
+      const animationDuration = 6 // seconds
+      const optionWidth = 180 // pixels
+      const optionHeight = 70 // pixels
+      const horizontalMargin = 20 // pixels horizontal margin between options
+      const verticalMargin = 60 // pixels vertical margin
+      const fallDistance = 600 // pixels (from -200 to +400)
+      const fallSpeed = fallDistance / animationDuration // pixels per second
+      const minTimeGap = (optionHeight + verticalMargin) / fallSpeed // Time for safe spacing
+      
+      // Calculate random horizontal positions with equal left/right margins
+      const leftMargin = 10 // Left margin percentage
+      const rightMargin = 10 // Right margin percentage
+      const optionWidthPercent = 18 // 180px option is roughly 18% of a 1000px container
+      const maxPositionStart = 100 - rightMargin - optionWidthPercent // Maximum left position (72%)
+      
+      // Generate completely random positions within safe bounds
+      const generateRandomPosition = () => {
+        return leftMargin + Math.random() * (maxPositionStart - leftMargin)
+      }
+      
+      // Track occupied space-time
+      const occupiedSpaces = []
+      
+      // Create 6 options with guaranteed spacing
+      for (let i = 0; i < 6; i++) {
+        const randomOptionIndex = Math.floor(Math.random() * selectedParameter.options.length)
+        const selectedOption = selectedParameter.options[randomOptionIndex]
+        
+        let finalPosition = generateRandomPosition()
+        let finalDelay = i * 0.8 + Math.random() * 1.0 // Base delay with more variance
+        let attempts = 0
+        const maxAttempts = 15
+        
+        // Find a non-colliding position and time
+        while (attempts < maxAttempts) {
+          let collision = false
+          
+          for (const occupied of occupiedSpaces) {
+            const horizontalDistance = Math.abs(occupied.position - finalPosition)
+            const timeDistance = Math.abs(occupied.delay - finalDelay)
+            
+            // Check if too close horizontally and temporally
+            if (horizontalDistance < 15 && timeDistance < minTimeGap * 0.7) {
+              collision = true
+              break
+            }
+          }
+          
+          if (!collision) {
+            break
+          }
+          
+          // Generate new random position and adjust timing
+          finalPosition = generateRandomPosition()
+          finalDelay += 1.0 + Math.random() * 0.3
+          attempts++
+        }
+        
+        // Record this occupied space
+        occupiedSpaces.push({ position: finalPosition, delay: finalDelay })
+        
+        newRandomizedOptions.push({
+          ...selectedOption,
+          uniqueId: `${selectedOption.id}-${i}-${Date.now()}`,
+          randomPosition: finalPosition,
+          randomDelay: finalDelay,
+          assignedColor: optionColorMap[selectedOption.id]
+        })
+      }
+      
+      setRandomizedOptions(newRandomizedOptions)
+    }
+  }, [selectedParameter])
+
+  // Timer effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - gameStartTime) / 1000))
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [gameStartTime])
 
   useEffect(() => {
     const filledCount = components.reduce((count, component) => {
@@ -150,7 +206,7 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
     const targetParam = components[0]?.parameters.find(param => param.id === clickedOption.targetParameter)
     if (!targetParam) return
 
-    if (clickedOption.isCorrect && !targetParam.filled) {
+    if (clickedOption.isCorrect && clickedOption.targetParameter === targetParam.id && !targetParam.filled) {
       // Add success block with staggered animation
       const blockIndex = successBlocks.length
       const newBlock = {
@@ -282,7 +338,7 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
   }
 
   return (
-    <div className="min-h-screen flex flex-col touch-pan-y" style={{ backgroundImage: 'url(/s03.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+    <div className="min-h-screen flex flex-col touch-pan-y" style={{ backgroundImage: 'url(/s03.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
       <style jsx>{`
         .options-screen {
           position: relative;
@@ -291,17 +347,17 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
         
         @keyframes smoothFall {
           0% { 
-            transform: translateY(-400px);
+            transform: translateY(-200px);
             opacity: 0;
           }
-          5% { 
+          3% { 
             opacity: 1;
           }
-          95% { 
+          97% { 
             opacity: 1;
           }
           100% { 
-            transform: translateY(700px);
+            transform: translateY(400px);
             opacity: 0;
           }
         }
@@ -311,7 +367,7 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
           position: absolute;
           z-index: 10;
           opacity: 0;
-          transform: translateY(-400px);
+          transform: translateY(-200px);
         }
         
         @keyframes blockDrop {
@@ -335,35 +391,37 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
 
       {/* Dell Technologies Header */}
       <div className="p-8">
-        <div className="mb-8 mt-32">
+        <div className=" mt-32">
           <div className="flex items-center mb-6">
-            <div className="w-5 h-20 bg-slate-800 mr-10"></div>
+            <div className="w-4 h-10 bg-[#C5D4E3] mr-10"></div>
             <div>
               {components[0] && (
-                <h1 className="text-7xl font-light text-slate-800">
+                <h1 className="text-5xl font-light text-[#C5D4E3] font-sans">
                   {components[0].name}
                 </h1>
               )}
+              
             </div>
+            
           </div>
+          <h3 className="text-[#C5D4E3] ml-16 text-2xl font-sans font-light">Tap on the right choice while it's falling.</h3>
         </div>
       </div>
 
       <div className="flex flex-1">
         {/* Left side - Options and Parameters */}
-        <div className="w-3.5/5 p-8 flex flex-col justify-between">
+        <div className="flex-1 p-8 flex flex-col justify-between" style={{ width: '70%' }}>
           {/* Options Panel */}
           <div className="flex-1 flex flex-col justify-center">
             <div className="bg-white py-16 px-6 shadow-sm mb-8 flex-1 flex flex-col justify-center options-screen">
               <div className="relative w-full h-full">
-                {selectedParameter &&
-                  Array.from({ length: 6 }, (_, index) => {
-                    const optionIndex = index % selectedParameter.options.length
-                    const option = selectedParameter.options[optionIndex]
-                    const columnIndex = index % 3
-                    const rowIndex = Math.floor(index / 3)
-                    const horizontalPosition = 10 + columnIndex * 35
-                    const verticalPosition = rowIndex === 0 ? 15 : 65
+                {randomizedOptions.length > 0 &&
+                  randomizedOptions.map((option, index) => {
+                    const horizontalPosition = option.randomPosition // Use random horizontal position
+                    const verticalPosition = 15 // All start from same vertical position but different delays
+                    
+                    // Use the consistent color assigned to this option
+                    const bgColor = option.assignedColor
                     
                     return (
                       <div
@@ -376,18 +434,18 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
                         }`}
                         style={{
                           width: '180px',
-                          height: '90px',
-                          backgroundColor: wrongClick === `${option.id}-${index}` ? '#EF4444' : '#C5D4E3',
-                          animationDelay: `${columnIndex * 2 + rowIndex * 6}s`,
-                          animationDuration: '12s',
+                          height: '70px',
+                          backgroundColor: wrongClick === `${option.id}-${index}` ? '#EF4444' : bgColor,
+                          animationDelay: `${option.randomDelay}s`,
+                          animationDuration: '6s',
                           left: `${horizontalPosition}%`,
                           top: `${verticalPosition}%`,
                           animationIterationCount: 'infinite'
                         }}
                       >
                         <div className="h-full flex flex-col justify-between">
-                          <h4 className="text-sm font-thin text-left">{option.text}</h4>
-                          <div className="w-6 h-0.5 bg-slate-800"></div>
+                          <h4 className="text-sm font-light text-left text-white font-sans">{option.text}</h4>
+                         
                         </div>
                       </div>
                     )
@@ -397,20 +455,35 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
           </div>
 
           {/* Parameters at bottom */}
-          <div className="flex gap-4">
+          <div className="flex gap-3 justify-start overflow-hidden">
+            {/* Timer Component */}
+            <div 
+              className="relative flex items-center justify-center flex-shrink-0"
+              style={{ width: '200px', height: '180px' }}
+            >
+              <div 
+                className="w-full h-full bg-center bg-cover flex items-center justify-center"
+                style={{ backgroundImage: 'url(/timer.png)' }}
+              >
+                <div className="text-4xl font-light text-white font-sans">
+                  {elapsedTime}s
+                </div>
+              </div>
+            </div>
+            
             {components[0]?.parameters.map((param) => (
               <div
                 key={param.id}
                 data-drop-zone="true"
                 data-parameter-id={param.id}
-                className={`transition-all duration-300 ease-in-out relative flex flex-row items-center justify-center transform touch-manipulation ${
+                className={`transition-all duration-300 ease-in-out relative flex flex-row items-center justify-center transform touch-manipulation flex-shrink-0 ${
                   param.filled ? "scale-100 cursor-default" : "hover:scale-105 cursor-pointer"
                 } ${
                   dragOverParameter === param.id ? "ring-4 ring-blue-400/50 scale-105 shadow-xl bg-blue-50/20 cursor-copy" : ""
                 } ${
                   wrongDrop === param.id ? "ring-4 ring-red-500 bg-red-100/20 animate-bounce cursor-not-allowed" : ""
                 }`}
-                style={{ width: '230px', height: '201px' }}
+                style={{ width: '205px', height: '180px' }}
                 onDragOver={(e) => handleDragOver(e, param.id)}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, param.id)}
@@ -420,21 +493,21 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
                   {param.filled && droppedOptions[param.id] ? (
                     <div style={{ backgroundColor: '#C5D4E3' }} className="border border-blue-200 rounded-lg p-4 w-full h-full">
                       <div className="h-full flex flex-col justify-between">
-                        <h4 className="text-3xl font-thin text-left">{droppedOptions[param.id].text}</h4>
+                        <h4 className="text-3xl font-light text-left font-sans">{droppedOptions[param.id].text}</h4>
                         <div className="w-8 h-1 bg-slate-800"></div>
                       </div>
                     </div>
                   ) : (
                     <>
                       <img
-                        src={getBeforeImage(param.name)}
+                        src={getParameterImage(param.name, isParameterActive(param, components[0]?.parameters || []))}
                         alt={param.name}
                         className="w-full h-full object-cover"
                       />
                       {dragOverParameter === param.id && draggedItem && (
                         <div className="absolute inset-0 flex items-center justify-center animate-fadeIn">
                           <img
-                            src={getAfterImage(param.name)}
+                            src={getParameterImage(param.name, true)}
                             alt={param.name}
                             className="w-full h-full object-cover opacity-90 animate-pulse transition-opacity duration-300"
                           />
@@ -450,7 +523,7 @@ const StackBuilder = ({ selectedDocument = { id: "doc1" }, onNext = () => {} }) 
         </div>
 
         {/* Right side - Image blocks stacking area */}
-        <div className="w-1/5 p-8 relative overflow-hidden">
+        <div className="p-8 relative overflow-hidden" style={{ width: '30%' }}>
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
             {successBlocks.map((block, index) => {
               const isVisible = visibleBlocks.includes(index)

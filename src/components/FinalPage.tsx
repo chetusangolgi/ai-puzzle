@@ -65,11 +65,7 @@ const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHom
     >
       <div className="h-full flex justify-end relative">
         <div className="fixed bottom-32 left-24"> {/* Changed to fixed */}
-          <img 
-            src="/frame.png" 
-            alt="Frame" 
-            className="w-auto h-auto"
-          />
+          
           <div className="flex mt-36 -ml-4">
             <button
               onClick={onHome}

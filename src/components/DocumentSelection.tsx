@@ -17,8 +17,8 @@ const documents: SelectedDocument[] = [
   },
   {
     id: 'button-2',
-    title: 'Enable AI Model Development',
-    description: 'Enable AI Model Development',
+    title: 'Enable AI Model Fine Tuning',
+    description: 'Enable AI Model Fine Tuning',
     icon: '/n/b2.png'
   },
   {

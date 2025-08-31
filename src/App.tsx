@@ -1,16 +1,15 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import StartScreen from './components/StartScreen';
-import InformationForm from './components/InformationForm';
+import UserInfo from './components/UserInfo';
 import DocumentSelection from './components/DocumentSelection';
 import StackBuilder from './components/StackBuilder';
-import StackReady from './components/StackReady';
+import Leaderboard from './components/Leaderboard';
 import FinalPage from './components/FinalPage';
+import { saveUserData, testConnection } from './lib/supabase';
 
 export interface UserInfo {
   name: string;
-  company: string;
-  role: string;
-  experience: string;
+  email: string;
 }
 
 export interface SelectedDocument {
@@ -23,27 +22,55 @@ function App() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: '',
-    company: '',
-    role: '',
-    experience: ''
+    email: ''
   });
+  const [gameScore, setGameScore] = useState<number>(0);
+  const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
   const [selectedDocument, setSelectedDocument] = useState<SelectedDocument | null>(null);
 
-  const nextPage = useCallback(() => {
-    setCurrentPage(prev => {
-      // Skip InformationForm (page 2) and set default user info
-      if (prev === 1) {
-        setUserInfo({
-          name: 'Guest',
-          company: 'N/A',
-          role: 'Developer',
-          experience: 'Intermediate (2-4 years)',
-        });
-        return 3; // Skip to DocumentSelection
-      }
-      return prev + 1;
-    });
+  // Test Supabase connection on app start
+  useEffect(() => {
+    testConnection();
   }, []);
+
+  const nextPage = useCallback(() => {
+    setCurrentPage(prev => prev + 1);
+  }, []);
+
+  const handleUserInfoSubmit = useCallback((userData: UserInfo) => {
+    setUserInfo(userData);
+    setGameStartTime(Date.now());
+    nextPage();
+  }, [nextPage]);
+
+  const handleStackBuilderComplete = useCallback(async () => {
+    const completionTime = Date.now();
+    const timeTaken = Math.round((completionTime - gameStartTime) / 1000); // seconds in timer format
+    
+    console.log('Stack builder completed!', { 
+      timeTaken, 
+      userInfo, 
+      gameStartTime, 
+      completionTime 
+    });
+    
+    setGameScore(timeTaken);
+    
+    // Save to Supabase
+    if (userInfo.name && userInfo.email) {
+      console.log('Saving user data to Supabase...');
+      const result = await saveUserData({
+        name: userInfo.name,
+        email: userInfo.email,
+        score: timeTaken
+      });
+      console.log('Save result:', result);
+    } else {
+      console.warn('Missing user info:', userInfo);
+    }
+    
+    nextPage();
+  }, [userInfo, gameStartTime, nextPage]);
 
   const goHome = useCallback(() => {
     setCurrentPage(1);
@@ -55,13 +82,13 @@ function App() {
       case 1:
         return <StartScreen onNext={nextPage} />;
       case 2:
-        return <InformationForm userInfo={userInfo} setUserInfo={setUserInfo} onNext={nextPage} />;
+        return <UserInfo onNext={handleUserInfoSubmit} />;
       case 3:
         return <DocumentSelection selectedDocument={selectedDocument} setSelectedDocument={setSelectedDocument} onNext={nextPage} />;
       case 4:
-        return <StackBuilder selectedDocument={selectedDocument} onNext={nextPage} />;
+        return <StackBuilder selectedDocument={selectedDocument} onNext={handleStackBuilderComplete} />;
       case 5:
-        return <StackReady selectedDocument={selectedDocument} onNext={nextPage} />;
+        return <Leaderboard onNext={nextPage} currentUser={{ name: userInfo.name, score: gameScore }} />;
       case 6:
         return <FinalPage userInfo={userInfo} selectedDocument={selectedDocument} onHome={goHome} />;
       default:

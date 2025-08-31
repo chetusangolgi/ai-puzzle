@@ -50,17 +50,17 @@ const allDragOptions: DragOption[] = [
 
   // Button-2 options
   { id: 'opt-16', text: 'PowerEdge XE-Series', isCorrect: true, targetParameter: 'hardware', documentType: 'button-2' },
-  { id: 'opt-17', text: 'PowerEdge R-Series', isCorrect: false, targetParameter: 'hardware', documentType: 'button-2' },
-  { id: 'opt-18', text: 'PowerEdge XR-Series', isCorrect: false, targetParameter: 'hardware', documentType: 'button-2' },
-  { id: 'opt-19', text: 'Dell AI Factory with NVIDIA', isCorrect: true, targetParameter: 'software-ai', documentType: 'button-2' },
-  { id: 'opt-20', text: 'Dell AI Data Platform & Data Lakehouse', isCorrect: false, targetParameter: 'software-ai', documentType: 'button-2' },
-  { id: 'opt-21', text: 'AI Orchestration, Management', isCorrect: false, targetParameter: 'software-ai', documentType: 'button-2' },
+  { id: 'opt-17', text: 'PowerEdge XR-Series', isCorrect: false, targetParameter: 'hardware', documentType: 'button-2' },
+  { id: 'opt-18', text: 'PowerScale C Series', isCorrect: false, targetParameter: 'hardware', documentType: 'button-2' },
+  { id: 'opt-19', text: 'Nvidia AIE suite', isCorrect: true, targetParameter: 'software-ai', documentType: 'button-2' },
+  { id: 'opt-20', text: 'PowerEdge XR-Series', isCorrect: false, targetParameter: 'software-ai', documentType: 'button-2' },
+  { id: 'opt-21', text: 'PowerScale C Series', isCorrect: false, targetParameter: 'software-ai', documentType: 'button-2' },
   { id: 'opt-22', text: 'Dell AI Readiness Assessment', isCorrect: true, targetParameter: 'ai-services', documentType: 'button-2' },
-  { id: 'opt-23', text: 'Orchestration, Cluster Automation', isCorrect: false, targetParameter: 'ai-services', documentType: 'button-2' },
-  { id: 'opt-24', text: 'Professional and Managed AI Services', isCorrect: false, targetParameter: 'ai-services', documentType: 'button-2' },
-  { id: 'opt-25', text: 'Hardware-Level Security', isCorrect: true, targetParameter: 'security', documentType: 'button-2' },
+  { id: 'opt-23', text: 'Cluster Automation services', isCorrect: false, targetParameter: 'ai-services', documentType: 'button-2' },
+  { id: 'opt-24', text: 'Cloud repatriation', isCorrect: false, targetParameter: 'ai-services', documentType: 'button-2' },
+  { id: 'opt-25', text: 'Establish Lawful bias', isCorrect: true, targetParameter: 'security', documentType: 'button-2' },
   { id: 'opt-26', text: 'Data Platform Protection', isCorrect: false, targetParameter: 'security', documentType: 'button-2' },
-  { id: 'opt-27', text: 'Network Security & Compliance Framework', isCorrect: false, targetParameter: 'security', documentType: 'button-2' },
+  { id: 'opt-27', text: 'Firewall and web access rules', isCorrect: false, targetParameter: 'security', documentType: 'button-2' },
 
   // Button-3 options
   { id: 'opt-31', text: 'Dell Pro Max AI PC', isCorrect: true, targetParameter: 'hardware', documentType: 'button-3' },
@@ -130,14 +130,14 @@ const stackComponentConfigs: { [key: string]: StackComponent } = {
   },
   'button-2': {
     id: 'ai-model-dev',
-    name: 'Enable AI Model Development',
-    description: 'Configure your Dell AI Stack for AI Model Development',
+    name: 'Enable AI Model Fine Tuning',
+    description: 'Configure your Dell AI Stack for AI Model Fine Tuning',
     icon: '',
     parameters: [
       { id: 'hardware', name: 'Hardware', acceptedOption: 'PowerEdge XE-Series', filled: false, options: [] },
-      { id: 'software-ai', name: 'Software & AI Platforms', acceptedOption: 'Dell AI Factory with NVIDIA', filled: false, options: [] },
+      { id: 'software-ai', name: 'Software & AI Platforms', acceptedOption: 'Nvidia AIE suite', filled: false, options: [] },
       { id: 'ai-services', name: 'AI Services', acceptedOption: 'Dell AI Readiness Assessment', filled: false, options: [] },
-      { id: 'security', name: 'Security & Governance', acceptedOption: 'Hardware-Level Security', filled: false, options: [] },
+      { id: 'security', name: 'Security & Governance', acceptedOption: 'Establish Lawful bias', filled: false, options: [] },
     ]
   },
   'button-3': {
