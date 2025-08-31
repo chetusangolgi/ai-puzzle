@@ -36,10 +36,10 @@ const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHom
       "Microsoft 365 Copilot": "Integrated directly into the Microsoft 365 suite, Copilot brings AI-enhanced productivity to apps like Word, Excel, Teams, and PowerPoint. It helps automate content creation, generate insightful summaries, and foster smarter collaboration across your organization.",
       "Dell AI Readiness Assessment": "A structured diagnostic to assess your organization's preparedness for AI adoption. It identifies quick-win use cases, highlights capability gaps, and develops a roadmap that accelerates AI implementation with minimal disruption.",
       "Trend Micro AI Security": "A robust, AI-driven security suite that protects collaboration platforms and data exchanges from threats in real time. It ensures safe, uninterrupted productivity—especially critical in hybrid work environments.",
-      "Dell Edge Gateway": "Enables real-time data processing and secure AI-enabled applications at the network edge. Ideal for supporting distributed teams and ensuring low-latency collaboration—even in remote or bandwidth-limited environments.",
-      "PowerEdge XE-Series": "High-performance edge servers optimized for harsh environments and AI workloads at the network edge.",
-      "Dell AI Factory with NVIDIA": "Complete AI infrastructure solution combining Dell hardware with NVIDIA accelerated computing for enterprise AI development.",
-      "Hardware-Level Security": "Built-in security features at the hardware level providing root of trust and protection against firmware attacks.",
+      "Dell Edge Gateway": "Secure, high-performance gateway enabling remote access and management of workloads at the edge. It bridges IT and OT environments, ensuring seamless connectivity, workload orchestration, and data transfer across distributed sites—while maintaining enterprise-grade security.",
+      "PowerEdge XE-Series": "High-density, acceleration-optimized AI/HPC servers (e.g., XE9680, XE9680L) built for scalable, cost-efficient on-prem AI workloads.",
+      "Nvidia AIE suite": "Suite of enterprise AI tools (NeMo, NIM, Blueprints, etc.) integrated into Dell's AI Factory with NVIDIA.",
+      "Establish Lawful bias": "Dell's Ethical AI Principles and training guide frameworks to ensure fairness, transparency, and compliance in AI.",
       "Dell Pro Max AI PC": "A high-performance AI PC designed for analytics-heavy workflows. It accelerates data insights with powerful processing and robust AI-assisted decision support.",
       "Dell Pro AI Studio": "An all-in-one development environment for AI workflows on Dell PCs. It brings pre-configured tools, frameworks, and models to your desktop—streamlining AI experimentation and deployment.",
       "Dell Professional Services for AI": "Strategic consulting to custom-build AI solutions tailored to your business objectives. Dell's experts guide implementation, from ideation to deployment and optimization.",
@@ -50,8 +50,7 @@ const FinalPage: React.FC<FinalPageProps> = ({ userInfo, selectedDocument, onHom
       "Dell Managed AI Ops": "Continuous monitoring, optimization, and orchestration of AI pipelines to ensure both performance and security. It abstracts the complexity of running AI at scale.",
       "Cyber Recovery Vault": "Secure, isolated backup architecture—ideal for protection against ransomware and data loss risks. Ensures rapid recovery without compromising AI system integrity.",
       "Edge Inferencing Kit": "A toolkit optimized for deploying AI inference at the network edge—enabling instant threat response in connected environments like retail, manufacturing, or remote sites.",
-      "McAfee AI Endpoint Protection": "AI-powered endpoint protection securing remote and hybrid devices against evolving threats.",
-      "APEX Flex on Demand": "A flexible infrastructure service offering pay-per-use access to AI workloads. It allows scaling compute resources up or down dynamically—perfect for variable training needs."
+      "McAfee AI Endpoint Protection": "AI-powered endpoint protection securing remote and hybrid devices against evolving threats."
     };
     return descriptions[optionName] || "Detailed information about this solution is coming soon.";
   };

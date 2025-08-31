@@ -78,7 +78,17 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onNext, currentUser }) => {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center relative">
+        {currentUser && (
+          <div className="absolute left-8 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6 max-w-xs">
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">Your Performance</h3>
+            <p className="text-slate-700">
+              <span className="font-medium text-blue-600">{currentUser.name}</span> you took{' '}
+              <span className="font-bold text-green-600">{formatTime(currentUser.score)}</span>{' '}
+              seconds to complete
+            </p>
+          </div>
+        )}
         <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-xl p-8 w-full max-w-2xl">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-slate-800 mb-2">🏆 Leaderboard</h1>

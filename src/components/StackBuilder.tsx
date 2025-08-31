@@ -21,14 +21,17 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
   const [gameStartTime, setGameStartTime] = useState(Date.now())
   const [randomizedOptions, setRandomizedOptions] = useState([])
 
-  // Stack block images
-  const blockImages = [
-    "/block1.png",
-    "/block2.png", 
-    "/block3.png",
-    "/block4.png",
-    "/block5.png"
-  ]
+  // Get document-specific block images
+  const getBlockImages = (documentType) => {
+    const baseCount = documentType === 'button-2' ? 4 : 5; // button-2 has 4 blocks, others have 5
+    const images = [];
+    for (let i = 1; i <= baseCount; i++) {
+      images.push(`/stack/${documentType}/Block ${i}.png`);
+    }
+    return images;
+  }
+
+  const [blockImages, setBlockImages] = useState(getBlockImages('button-1'))
 
   // Map parameter types to their respective images
   // Active parameters (filled or currently available) use 'before' images, others use 'after' images
@@ -78,6 +81,7 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       const stackComponents = getStackComponentsForDocument(selectedDocument.id)
       setComponents(stackComponents)
       setGameStartTime(Date.now())
+      setBlockImages(getBlockImages(selectedDocument.id))
       
       if (stackComponents.length > 0) {
         setTotalParameters(stackComponents[0].parameters.length)
@@ -126,10 +130,33 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       // Track occupied space-time
       const occupiedSpaces = []
       
-      // Create 6 options with guaranteed spacing
+      // Ensure the correct option is always included
+      const correctOption = selectedParameter.options.find(opt => opt.isCorrect)
+      const availableOptions = [...selectedParameter.options]
+      
+      // Create 6 options, ensuring the correct one is always included
+      const selectedOptions = []
+      
+      // Always include the correct option first
+      if (correctOption) {
+        selectedOptions.push(correctOption)
+      }
+      
+      // Fill the remaining slots with random options (can include duplicates)
+      while (selectedOptions.length < 6) {
+        const randomOptionIndex = Math.floor(Math.random() * availableOptions.length)
+        selectedOptions.push(availableOptions[randomOptionIndex])
+      }
+      
+      // Shuffle the selected options so the correct one isn't always first
+      for (let i = selectedOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [selectedOptions[i], selectedOptions[j]] = [selectedOptions[j], selectedOptions[i]]
+      }
+      
+      // Create the falling options
       for (let i = 0; i < 6; i++) {
-        const randomOptionIndex = Math.floor(Math.random() * selectedParameter.options.length)
-        const selectedOption = selectedParameter.options[randomOptionIndex]
+        const selectedOption = selectedOptions[i]
         
         let finalPosition = generateRandomPosition()
         let finalDelay = i * 0.8 + Math.random() * 1.0 // Base delay with more variance
@@ -193,7 +220,10 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
     setTotalFilled(filledCount)
 
     if (filledCount === totalParameters && totalParameters > 0) {
-      onNext()
+      // Add a 2-second delay before transitioning to leaderboard
+      setTimeout(() => {
+        onNext()
+      }, 2000)
     }
   }, [components, onNext, totalParameters])
 
@@ -429,7 +459,7 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                         onClick={() => handleOptionClick(option.id, `${option.id}-${index}`)}
                         onDragStart={(e) => handleDragStart(e, option.id)}
                         draggable
-                        className={`falling-option border border-blue-200 rounded-lg p-4 cursor-pointer transition-all duration-300 touch-manipulation select-none ${
+                        className={`falling-option border border-blue-200  p-4 cursor-pointer transition-all duration-300 touch-manipulation select-none ${
                           wrongClick === `${option.id}-${index}` ? "bg-red-500 animate-pulse" : ""
                         }`}
                         style={{
@@ -465,8 +495,13 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                 className="w-full h-full bg-center bg-cover flex items-center justify-center"
                 style={{ backgroundImage: 'url(/timer.png)' }}
               >
-                <div className="text-4xl font-light text-white font-sans">
-                  {elapsedTime}s
+                <div className="flex items-end justify-center">
+                  <div className="text-7xl font-light text-[#1D2C3B] font-sans leading-none">
+                    {elapsedTime}
+                  </div>
+                  <div className="text-4xl font-light text-[#1D2C3B] font-sans ml-1 pb-1">
+                    s
+                  </div>
                 </div>
               </div>
             </div>
@@ -536,9 +571,9 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                     isVisible ? "opacity-100" : "opacity-0"
                   }`}
                   style={{
-                    width: '176px',
-                    height: '148px',
-                    bottom: stackPosition >= 0 ? `${stackPosition * 64}px` : '0px',
+                    width: '260px',
+                    height: '232px',
+                    bottom: stackPosition >= 0 ? `${stackPosition * 84}px` : '0px',
                     left: '50%',
                     transform: isVisible
                       ? 'translateX(-50%)'
@@ -556,23 +591,6 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
             })}
           </div>
 
-          {/* Optional: Success particles */}
-          {successBlocks.length > 0 && (
-            <div className="absolute inset-0 pointer-events-none">
-              {[...Array(10)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-2 h-2 bg-blue-400 rounded-full animate-pulse"
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 20}%`,
-                    animationDelay: `${Math.random() * 2}s`,
-                    animationDuration: `${2 + Math.random() * 2}s`,
-                  }}
-                />
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

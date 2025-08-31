@@ -41,7 +41,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ onNext }) => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex p-4"
       style={{
         backgroundImage: 'url(/reg.png)',
         backgroundSize: 'cover',
@@ -49,45 +49,46 @@ const UserInfo: React.FC<UserInfoProps> = ({ onNext }) => {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Welcome to Dell AI Stack</h1>
-          <p className="text-slate-600">Please enter your information to continue</p>
-        </div>
+      <div className="p-4 w-full max-w-md ml-72 mt-[30rem]">
+        
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
-              Full Name
-            </label>
+          <div className="relative">
+            {!name && (
+              <div className="absolute inset-0 flex items-center px-6 pointer-events-none text-xl" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 300, color: '#1D2C3B' }}>
+                Enter your <span className="font-semibold ml-1">Name</span>
+              </div>
+            )}
             <input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+              className={`w-full px-6 py-5 border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors font-semibold ${
                 errors.name ? 'border-red-500 bg-red-50' : 'border-slate-300'
               }`}
-              placeholder="Enter your full name"
+              style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 600 }}
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-600">{errors.name}</p>
             )}
           </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
-              Email Address
-            </label>
+          <div className="relative">
+            {!email && (
+              <div className="absolute text-xl inset-0 flex items-center px-6 pointer-events-none" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 300, color: '#1D2C3B' }}>
+                Enter your <span className="font-semibold ml-1">Email</span>
+              </div>
+            )}
             <input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+              className={`w-full px-6 py-5 border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors font-semibold ${
                 errors.email ? 'border-red-500 bg-red-50' : 'border-slate-300'
               }`}
-              placeholder="Enter your email address"
+              style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 600 }}
             />
             {errors.email && (
               <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -96,10 +97,11 @@ const UserInfo: React.FC<UserInfoProps> = ({ onNext }) => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+            style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 300 }}
+            className="w-72 bg-[#1D2C3B] hover:bg-blue-700 text-3xl text-white font-medium py-5 px-4 transition-colors duration-200 flex items-center justify-center space-x-2"
           >
-            <span>Continue</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Submit</span>
+            
           </button>
         </form>
       </div>
