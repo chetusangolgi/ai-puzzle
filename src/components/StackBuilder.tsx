@@ -223,7 +223,7 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       // Add a 2-second delay before transitioning to leaderboard
       setTimeout(() => {
         onNext()
-      }, 2000)
+      }, 1000)
     }
   }, [components, onNext, totalParameters])
 

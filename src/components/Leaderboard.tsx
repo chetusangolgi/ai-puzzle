@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Medal, Award, ArrowRight } from 'lucide-react';
 import { getLeaderboard, UserData } from '../lib/supabase';
 
 interface LeaderboardProps {
@@ -32,31 +31,14 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onNext, currentUser }) => {
     fetchLeaderboard();
   }, []);
 
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Trophy className="w-6 h-6 text-yellow-500" />;
-      case 2:
-        return <Medal className="w-6 h-6 text-gray-400" />;
-      case 3:
-        return <Award className="w-6 h-6 text-amber-600" />;
-      default:
-        return <span className="w-6 h-6 flex items-center justify-center text-slate-600 font-bold">{rank}</span>;
-    }
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onNext();
+    }, 5000);
 
-  const getRankStyle = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200';
-      case 2:
-        return 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200';
-      case 3:
-        return 'bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200';
-      default:
-        return 'bg-white border-slate-200';
-    }
-  };
+    return () => clearTimeout(timer);
+  }, [onNext]);
+
 
   const isCurrentUser = (user: UserData) => {
     return currentUser && user.name === currentUser.name && user.score === currentUser.score;
@@ -72,7 +54,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onNext, currentUser }) => {
     <div 
       className="min-h-screen p-4 flex flex-col"
       style={{
-        backgroundImage: 'url(/s04.png)',
+        backgroundImage: 'url(/leader.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
@@ -80,88 +62,99 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onNext, currentUser }) => {
     >
       <div className="flex-1 flex items-center justify-center relative">
         {currentUser && (
-          <div className="absolute left-8 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6 max-w-xs">
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">Your Performance</h3>
-            <p className="text-slate-700">
-              <span className="font-medium text-blue-600">{currentUser.name}</span> you took{' '}
-              <span className="font-bold text-green-600">{formatTime(currentUser.score)}</span>{' '}
-              seconds to complete
+          <div className="absolute left-8 top-1/2 -translate-y-1/2  p-6 max-w-xl text-6xl" style={{ fontFamily: 'Roboto' }}>
+           
+            <p className="text-slate-700 font-light">
+              <span>{currentUser.name.charAt(0).toUpperCase() + currentUser.name.slice(1)}</span> you took{' '}
+              <span className="font-bold ">{formatTime(currentUser.score)}</span>{' '}
+              <span className="font-bold">seconds</span> to complete
             </p>
           </div>
         )}
-        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-xl p-8 w-full max-w-2xl">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-slate-800 mb-2">🏆 Leaderboard</h1>
-            <p className="text-slate-600">Top 10 Dell AI Stack Champions</p>
-          </div>
+        <div className="rounded-lg p-8 w-full max-w-5xl ml-[800px]" style={{ fontFamily: 'Roboto' }}>
+          
 
           {loading ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12" style={{ fontFamily: 'Roboto' }}>
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-slate-600">Loading leaderboard...</p>
+              <p className="text-slate-600 font-light">Loading leaderboard...</p>
             </div>
           ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-600 mb-4">{error}</p>
+            <div className="text-center py-12" style={{ fontFamily: 'Roboto' }}>
+              <p className="text-red-600 mb-4 font-light">{error}</p>
               <button 
                 onClick={() => window.location.reload()}
-                className="text-blue-600 hover:text-blue-700 underline"
+                className="text-blue-600 hover:text-blue-700 underline font-light"
               >
                 Try again
               </button>
             </div>
           ) : leaderboard.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-slate-600 mb-4">No scores yet. Be the first to complete the challenge!</p>
+            <div className="text-center py-12" style={{ fontFamily: 'Roboto' }}>
+              <p className="text-slate-600 mb-4 font-light">No scores yet. Be the first to complete the challenge!</p>
             </div>
           ) : (
-            <div className="space-y-3 mb-8">
+            <>
+            
+              
+              
+            
+            
+              <div className="mb-6 flex items-center">
+                <div className="w-[16px] h-[54px] bg-[#1D2C3B] mr-8"></div>
+                <div>
+                  <h1 className="text-[64px] font-light text-[#1D2C3B] font-sans">
+                    Top Players
+                  </h1>
+                </div>
+              </div>
+              <div className="flex items-center justify-between px-4 pb-4 text-[#1D2C3B]">
+                <div className="flex items-center space-x-32">
+                  <span className="w-[24px] text-3xl font-light" style={{ fontFamily: 'Roboto' }}>
+                    Rank
+                  </span>
+                  <span className="w-[24px] text-3xl font-light" style={{ fontFamily: 'Roboto' }}>
+                    Name
+                  </span>
+                </div>
+                <span className="w-[24px] text-3xl font-light text-right mr-[30px]" style={{ fontFamily: 'Roboto' }}>
+                  Score
+                </span>
+              </div>
+              <div className="space-y-1">
               {leaderboard.map((user, index) => {
                 const rank = index + 1;
                 const userIsCurrentUser = isCurrentUser(user);
+                const isTopThree = rank <= 3;
                 
                 return (
                   <div 
                     key={user.id || index}
-                    className={`p-4 border rounded-lg transition-all duration-200 ${getRankStyle(rank)} ${
+                    className={`p-4  transition-all duration-200 ${
                       userIsCurrentUser ? 'ring-2 ring-blue-400 shadow-lg' : ''
                     }`}
+                    style={{ backgroundColor: '#1D2C3B' }}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        {getRankIcon(rank)}
-                        <div>
-                          <h3 className={`font-semibold ${userIsCurrentUser ? 'text-blue-700' : 'text-slate-800'}`}>
-                            {user.name}
-                            {userIsCurrentUser && <span className="ml-2 text-sm text-blue-600">(You)</span>}
-                          </h3>
-                          <p className="text-sm text-slate-600">
-                            Completed in {formatTime(user.score)}
-                          </p>
+                      <div className="flex items-center space-x-32">
+                        <span className={`w-8 h-8 flex items-center justify-center text-white text-2xl font-light ${isTopThree ? 'font-semibold' : ''}`} style={{ fontFamily: 'Roboto' }}>
+                          {rank.toString().padStart(2, '0')}
+                        </span>
+                        <div className={`text-white text-2xl font-light ${isTopThree ? 'font-semibold' : ''}`} style={{ fontFamily: 'Roboto' }}>
+                          {user.name}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className={`text-2xl font-bold ${userIsCurrentUser ? 'text-blue-700' : 'text-slate-800'}`}>
-                          {formatTime(user.score)}
-                        </div>
-                        <div className="text-sm text-slate-500">time</div>
+                      <div className={`text-white text-2xl font-light text-right ${isTopThree ? 'font-semibold' : ''}`} style={{ fontFamily: 'Roboto' }}>
+                        {formatTime(user.score)}
                       </div>
                     </div>
                   </div>
                 );
               })}
-            </div>
+              </div>
+            </>
           )}
 
-          <div className="flex justify-center">
-            <button
-              onClick={onNext}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center space-x-2"
-            >
-              <span>View Results</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
       </div>
     </div>
