@@ -32,6 +32,18 @@ function App() {
   useEffect(() => {
     testConnection();
   }, []);
+  // Disable right-click context menu
+  useEffect(() => {
+    const disableRightClick = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener('contextmenu', disableRightClick);
+    
+    return () => {
+      document.removeEventListener('contextmenu', disableRightClick);
+    };
+  }, []);
 
   const nextPage = useCallback(() => {
     setCurrentPage(prev => prev + 1);
