@@ -138,15 +138,29 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       const correctOption = selectedParameter.options.find(opt => opt.isCorrect)
       const availableOptions = [...selectedParameter.options]
       
-      // Create 3 options, ensuring the correct one is always included
+      // Create 3 options, ensuring the correct one is always included and all are different
       const selectedOptions = []
+      const usedOptionIds = new Set()
       
       // Always include the correct option first
       if (correctOption) {
         selectedOptions.push(correctOption)
+        usedOptionIds.add(correctOption.id)
       }
       
-      // Fill the remaining slots with random options (can include duplicates)
+      // Fill the remaining slots with different options (no duplicates)
+      while (selectedOptions.length < 3 && selectedOptions.length < availableOptions.length) {
+        const randomOptionIndex = Math.floor(Math.random() * availableOptions.length)
+        const randomOption = availableOptions[randomOptionIndex]
+        
+        // Only add if we haven't used this option ID yet
+        if (!usedOptionIds.has(randomOption.id)) {
+          selectedOptions.push(randomOption)
+          usedOptionIds.add(randomOption.id)
+        }
+      }
+      
+      // If we still need more options and have exhausted unique ones, fill with remaining available options
       while (selectedOptions.length < 3) {
         const randomOptionIndex = Math.floor(Math.random() * availableOptions.length)
         selectedOptions.push(availableOptions[randomOptionIndex])
@@ -582,7 +596,7 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                 } ${
                   wrongDrop === param.id ? "ring-4 ring-red-500 bg-red-100/20 animate-bounce cursor-not-allowed" : ""
                 }`}
-                style={{ width: '205px', height: '180px' }}
+                style={{ width: '204px', height: '179px' }}
                 onDragOver={(e) => handleDragOver(e, param.id)}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, param.id)}
