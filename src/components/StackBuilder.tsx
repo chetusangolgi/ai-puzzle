@@ -514,8 +514,8 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                           animationIterationCount: 'infinite'
                         }}
                       >
-                        <div className="h-full flex flex-col justify-between">
-                          <h4 className="text-sm font-light text-left text-white font-sans">{option.text}</h4>
+                        <div className="">
+                          <h4 className="text-sm font-light text-center text-white font-sans">{option.text}</h4>
                          
                         </div>
                       </div>
