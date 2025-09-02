@@ -97,19 +97,23 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
   // Generate randomized options when selectedParameter changes
   useEffect(() => {
     if (selectedParameter && selectedParameter.options.length > 0) {
-      const colors = ['#0672CB', '#0B7C84', '#66278F']
+      const backgroundImages = ['/optionsbg/bg1.png', '/optionsbg/bg2.png', '/optionsbg/bg3.png']
+      const textColors = ['#80AEEE', '#80E7EE', '#8BEEB0']
       
-      // Assign consistent colors to each unique option
-      const optionColorMap = {}
+      // Assign consistent background images and text colors to each unique option
+      const optionBgMap = {}
+      const optionTextColorMap = {}
       selectedParameter.options.forEach((option, index) => {
-        optionColorMap[option.id] = colors[index % colors.length]
+        const colorIndex = index % backgroundImages.length
+        optionBgMap[option.id] = backgroundImages[colorIndex]
+        optionTextColorMap[option.id] = textColors[colorIndex]
       })
       
       // Create truly random falling options with proper spacing
       const newRandomizedOptions = []
       const animationDuration = 6 // seconds
-      const optionWidth = 180 // pixels
-      const optionHeight = 70 // pixels
+      const optionWidth = 160 // pixels - larger square dimensions
+      const optionHeight = 160 // pixels - larger square dimensions
       const horizontalMargin = 20 // pixels horizontal margin between options
       const verticalMargin = 60 // pixels vertical margin
       const fallDistance = 600 // pixels (from -200 to +400)
@@ -119,8 +123,8 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       // Calculate random horizontal positions with equal left/right margins
       const leftMargin = 10 // Left margin percentage
       const rightMargin = 10 // Right margin percentage
-      const optionWidthPercent = 18 // 180px option is roughly 18% of a 1000px container
-      const maxPositionStart = 100 - rightMargin - optionWidthPercent // Maximum left position (72%)
+      const optionWidthPercent = 16 // 160px option is roughly 16% of a 1000px container
+      const maxPositionStart = 100 - rightMargin - optionWidthPercent // Maximum left position (74%)
       
       // Generate completely random positions within safe bounds
       const generateRandomPosition = () => {
@@ -134,7 +138,7 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       const correctOption = selectedParameter.options.find(opt => opt.isCorrect)
       const availableOptions = [...selectedParameter.options]
       
-      // Create 6 options, ensuring the correct one is always included
+      // Create 3 options, ensuring the correct one is always included
       const selectedOptions = []
       
       // Always include the correct option first
@@ -143,7 +147,7 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       }
       
       // Fill the remaining slots with random options (can include duplicates)
-      while (selectedOptions.length < 6) {
+      while (selectedOptions.length < 3) {
         const randomOptionIndex = Math.floor(Math.random() * availableOptions.length)
         selectedOptions.push(availableOptions[randomOptionIndex])
       }
@@ -155,7 +159,7 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       }
       
       // Create the falling options
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 3; i++) {
         const selectedOption = selectedOptions[i]
         
         let finalPosition = generateRandomPosition()
@@ -196,7 +200,8 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
           uniqueId: `${selectedOption.id}-${i}-${Date.now()}`,
           randomPosition: finalPosition,
           randomDelay: finalDelay,
-          assignedColor: optionColorMap[selectedOption.id]
+          assignedBgImage: optionBgMap[selectedOption.id],
+          assignedTextColor: optionTextColorMap[selectedOption.id]
         })
       }
       
@@ -489,8 +494,9 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                     const horizontalPosition = option.randomPosition // Use random horizontal position
                     const verticalPosition = 15 // All start from same vertical position but different delays
                     
-                    // Use the consistent color assigned to this option
-                    const bgColor = option.assignedColor
+                    // Use the consistent background image and text color assigned to this option
+                    const bgImage = option.assignedBgImage
+                    const textColor = option.assignedTextColor
                     
                     return (
                       <div
@@ -500,13 +506,17 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
                         draggable
-                        className={`falling-option border border-blue-200  p-4 cursor-grab transition-all duration-300 touch-manipulation select-none ${
+                        className={`falling-option cursor-grab transition-all duration-300 touch-manipulation select-none ${
                           wrongClick === option.uniqueId ? "bg-red-500 animate-pulse" : ""
                         } ${draggedItem?.uniqueKey === option.uniqueId ? "dragging" : ""}`}
                         style={{
-                          width: '180px',
-                          height: '70px',
-                          backgroundColor: wrongClick === option.uniqueId ? '#EF4444' : bgColor,
+                          width: '160px',
+                          height: '160px',
+                          backgroundImage: wrongClick === option.uniqueId ? 'none' : `url(${bgImage})`,
+                          backgroundColor: wrongClick === option.uniqueId ? '#EF4444' : 'transparent',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
                           animationDelay: `${option.randomDelay}s`,
                           animationDuration: '6s',
                           left: `${horizontalPosition}%`,
@@ -514,9 +524,22 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                           animationIterationCount: 'infinite'
                         }}
                       >
-                        <div className="">
-                          <h4 className="text-sm font-light text-center text-white font-sans">{option.text}</h4>
-                         
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div 
+                            className="flex items-center justify-center rounded-full"
+                            style={{ 
+                              width: '80px', // 50% of 160px radius (80px * 0.5 = 40px radius, 80px diameter)
+                              height: '80px'
+                            }}
+                          >
+                            <h4 className="text-sm font-light text-center font-sans px-2 leading-tight break-words overflow-hidden" style={{ 
+                              color: textColor,
+                              fontSize: '14px',
+                              lineHeight: '1.3',
+                              wordBreak: 'break-word',
+                              hyphens: 'auto'
+                            }}>{option.text}</h4>
+                          </div>
                         </div>
                       </div>
                     )
@@ -638,18 +661,35 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       {/* Touch Drag Indicator */}
       {touchedItem && touchPosition && (
         <div
-          className="fixed pointer-events-none z-50 border-2 border-blue-300 rounded-lg p-3 shadow-2xl transform -translate-x-1/2 -translate-y-1/2 opacity-90"
+          className="fixed pointer-events-none z-50 shadow-2xl transform -translate-x-1/2 -translate-y-1/2 opacity-90"
           style={{
             left: touchPosition.x,
             top: touchPosition.y,
-            width: '180px',
-            height: '70px',
-            backgroundColor: randomizedOptions.find(opt => opt.id === touchedItem)?.assignedColor || '#0672CB'
+            width: '160px',
+            height: '160px',
+            backgroundImage: `url(${randomizedOptions.find(opt => opt.id === touchedItem)?.assignedBgImage || '/optionsbg/bg1.png'})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
           }}
         >
-          <div className="h-full flex flex-col justify-center">
-            <div className="text-center text-white text-sm font-light">
-              {randomizedOptions.find(opt => opt.id === touchedItem)?.text || 'Dragging...'}
+          <div className="h-full flex items-center justify-center">
+            <div 
+              className="flex items-center justify-center rounded-full"
+              style={{ 
+                width: '80px', // 50% of 160px radius (80px * 0.5 = 40px radius, 80px diameter)
+                height: '80px'
+              }}
+            >
+              <div className="text-center text-sm font-bold px-2 leading-tight break-words overflow-hidden" style={{ 
+                color: randomizedOptions.find(opt => opt.id === touchedItem)?.assignedTextColor || '#80AEEE',
+                fontSize: '14px',
+                lineHeight: '1.3',
+                wordBreak: 'break-word',
+                hyphens: 'auto'
+              }}>
+                {randomizedOptions.find(opt => opt.id === touchedItem)?.text || 'Dragging...'}
+              </div>
             </div>
           </div>
         </div>
