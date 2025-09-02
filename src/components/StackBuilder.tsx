@@ -227,71 +227,25 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
     }
   }, [components, onNext, totalParameters])
 
-  const handleOptionClick = (optionId, uniqueKey) => {
-    if (!selectedParameter) return
 
-    const clickedOption = selectedParameter.options.find(opt => opt.id === optionId)
-    if (!clickedOption) return
-
-    const targetParam = components[0]?.parameters.find(param => param.id === clickedOption.targetParameter)
-    if (!targetParam) return
-
-    if (clickedOption.isCorrect && clickedOption.targetParameter === targetParam.id && !targetParam.filled) {
-      // Add success block with staggered animation
-      const blockIndex = successBlocks.length
-      const newBlock = {
-        id: `success-${Date.now()}-${Math.random()}`,
-        timestamp: Date.now(),
-        stackIndex: blockIndex,
-        imageUrl: blockImages[blockIndex % blockImages.length]
-      }
-      
-      setSuccessBlocks(prev => [...prev, newBlock])
-      
-      // Stagger the visibility animation
-      setTimeout(() => {
-        setVisibleBlocks(prev => [...prev, blockIndex])
-      }, 100)
-      
-      // Update dropped options
-      setDroppedOptions(prev => ({
-        ...prev,
-        [clickedOption.targetParameter]: clickedOption
-      }))
-      
-      // Update component parameters
-      const updatedComponents = components.map((component) => ({
-        ...component,
-        parameters: component.parameters.map((param) =>
-          param.id === clickedOption.targetParameter ? { ...param, filled: true } : param,
-        ),
-      }))
-      
-      setComponents(updatedComponents)
-      
-      // Auto-select next parameter
-      const nextParameter = getNextUnfilledParameter(updatedComponents)
-      setSelectedParameter(nextParameter)
-    } else {
-      // Wrong answer
-      setWrongClick(uniqueKey)
-      setTimeout(() => {
-        setWrongClick(null)
-      }, 1000)
-    }
-  }
-
-  const handleDragStart = (e, optionId) => {
-    setDraggedItem(optionId)
+  const handleDragStart = (e, optionId, uniqueKey) => {
+    setDraggedItem({ optionId, uniqueKey })
     e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", JSON.stringify({ optionId, uniqueKey }))
     document.body.style.cursor = "grabbing"
   }
 
   const handleDragOver = (e, parameterId) => {
     e.preventDefault()
-    e.dataTransfer.dropEffect = "move"
-    if (parameterId) {
+    
+    // Only allow drag over if parameter is not filled
+    const targetParam = components[0]?.parameters.find(param => param.id === parameterId)
+    if (targetParam && !targetParam.filled) {
+      e.dataTransfer.dropEffect = "move"
       setDragOverParameter(parameterId)
+    } else {
+      e.dataTransfer.dropEffect = "none"
+      setDragOverParameter(null)
     }
   }
 
@@ -305,15 +259,71 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
     setDragOverParameter(null)
   }
 
+  // Touch event handlers
+  const handleTouchStart = (e, optionId, uniqueKey) => {
+    e.preventDefault()
+    const touch = e.touches[0]
+    setTouchedItem(optionId)
+    setTouchPosition({ x: touch.clientX, y: touch.clientY })
+    setDraggedItem({ optionId, uniqueKey })
+  }
+
+  const handleTouchMove = (e) => {
+    if (!touchedItem || !draggedItem) return
+    e.preventDefault()
+    
+    const touch = e.touches[0]
+    setTouchPosition({ x: touch.clientX, y: touch.clientY })
+    
+    // Find element under touch point
+    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
+    const dropZone = elementBelow?.closest('[data-drop-zone="true"]')
+    
+    if (dropZone) {
+      const parameterId = dropZone.getAttribute('data-parameter-id')
+      setDragOverParameter(parameterId)
+    } else {
+      setDragOverParameter(null)
+    }
+  }
+
+  const handleTouchEnd = (e) => {
+    if (!touchedItem || !draggedItem) return
+    e.preventDefault()
+    
+    const touch = e.changedTouches[0]
+    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
+    const dropZone = elementBelow?.closest('[data-drop-zone="true"]')
+    
+    if (dropZone) {
+      const parameterId = dropZone.getAttribute('data-parameter-id')
+      if (parameterId) {
+        // Simulate drop event
+        const syntheticEvent = {
+          preventDefault: () => {},
+        }
+        handleDrop(syntheticEvent, parameterId)
+      }
+    }
+    
+    // Cleanup
+    setTouchedItem(null)
+    setTouchPosition(null)
+    setDraggedItem(null)
+    setDragOverParameter(null)
+  }
+
   const handleDrop = (e, parameterId) => {
     e.preventDefault()
 
     if (!draggedItem) return
 
+    const { optionId, uniqueKey } = draggedItem
+
     let draggedOption
     for (const component of components) {
       for (const param of component.parameters) {
-        const option = param.options.find((opt) => opt.id === draggedItem)
+        const option = param.options.find((opt) => opt.id === optionId)
         if (option) {
           draggedOption = option
           break
@@ -324,7 +334,16 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
 
     if (!draggedOption) return
 
-    if (draggedOption.targetParameter === parameterId && draggedOption.isCorrect) {
+    // Check if this is the correct parameter for the dragged option and parameter is not already filled
+    const targetParam = components[0]?.parameters.find(param => param.id === parameterId)
+    const isValidTarget = draggedOption.targetParameter === parameterId && 
+                          draggedOption.isCorrect && 
+                          !targetParam?.filled
+    
+    if (isValidTarget) {
+      // Hide the dragged falling option by removing it from randomizedOptions
+      setRandomizedOptions(prev => prev.filter(opt => opt.uniqueId !== uniqueKey))
+      
       // Add success block with image
       const blockIndex = successBlocks.length
       const newBlock = {
@@ -354,6 +373,7 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       
       setComponents(updatedComponents)
       
+      // Auto-select next unfilled parameter
       const nextParameter = getNextUnfilledParameter(updatedComponents)
       setSelectedParameter(nextParameter)
     } else {
@@ -368,7 +388,11 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
   }
 
   return (
-    <div className="min-h-screen flex flex-col touch-pan-y" style={{ backgroundImage: 'url(/s03.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+    <div 
+      className="min-h-screen flex flex-col touch-pan-y" 
+      style={{ backgroundImage: 'url(/s03.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
+      onTouchMove={handleTouchMove}
+    >
       <style jsx>{`
         .options-screen {
           position: relative;
@@ -398,6 +422,21 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
           z-index: 10;
           opacity: 0;
           transform: translateY(-200px);
+        }
+        
+        .falling-option:hover {
+          transform: scale(1.05);
+          transition: transform 0.2s ease;
+        }
+        
+        .falling-option.dragging {
+          opacity: 0.7;
+          transform: scale(0.95);
+        }
+        
+        .falling-option:active {
+          transform: scale(0.98);
+          opacity: 0.8;
         }
         
         @keyframes blockDrop {
@@ -434,7 +473,7 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
             </div>
             
           </div>
-          <h3 className="text-[#C5D4E3] ml-16 text-2xl font-sans font-light">Tap on the right choice while it's falling.</h3>
+          <h3 className="text-[#C5D4E3] ml-16 text-2xl font-sans font-light">Drag the right choice to the parameter slot.</h3>
         </div>
       </div>
 
@@ -456,16 +495,18 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                     return (
                       <div
                         key={`${option.id}-${index}`}
-                        onClick={() => handleOptionClick(option.id, `${option.id}-${index}`)}
-                        onDragStart={(e) => handleDragStart(e, option.id)}
+                        onDragStart={(e) => handleDragStart(e, option.id, option.uniqueId)}
+                        onTouchStart={(e) => handleTouchStart(e, option.id, option.uniqueId)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
                         draggable
-                        className={`falling-option border border-blue-200  p-4 cursor-pointer transition-all duration-300 touch-manipulation select-none ${
-                          wrongClick === `${option.id}-${index}` ? "bg-red-500 animate-pulse" : ""
-                        }`}
+                        className={`falling-option border border-blue-200  p-4 cursor-grab transition-all duration-300 touch-manipulation select-none ${
+                          wrongClick === option.uniqueId ? "bg-red-500 animate-pulse" : ""
+                        } ${draggedItem?.uniqueKey === option.uniqueId ? "dragging" : ""}`}
                         style={{
                           width: '180px',
                           height: '70px',
-                          backgroundColor: wrongClick === `${option.id}-${index}` ? '#EF4444' : bgColor,
+                          backgroundColor: wrongClick === option.uniqueId ? '#EF4444' : bgColor,
                           animationDelay: `${option.randomDelay}s`,
                           animationDuration: '6s',
                           left: `${horizontalPosition}%`,
@@ -597,16 +638,19 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
       {/* Touch Drag Indicator */}
       {touchedItem && touchPosition && (
         <div
-          className="fixed pointer-events-none z-50 bg-blue-100 border-2 border-blue-300 rounded-lg p-2 shadow-2xl transform -translate-x-1/2 -translate-y-1/2 animate-pulse"
+          className="fixed pointer-events-none z-50 border-2 border-blue-300 rounded-lg p-3 shadow-2xl transform -translate-x-1/2 -translate-y-1/2 opacity-90"
           style={{
             left: touchPosition.x,
             top: touchPosition.y,
-            width: '150px',
-            height: '100px'
+            width: '180px',
+            height: '70px',
+            backgroundColor: randomizedOptions.find(opt => opt.id === touchedItem)?.assignedColor || '#0672CB'
           }}
         >
-          <div className="text-center text-blue-800 text-sm font-medium">
-            {selectedParameter?.options.find(opt => opt.id === touchedItem)?.text || 'Dragging...'}
+          <div className="h-full flex flex-col justify-center">
+            <div className="text-center text-white text-sm font-light">
+              {randomizedOptions.find(opt => opt.id === touchedItem)?.text || 'Dragging...'}
+            </div>
           </div>
         </div>
       )}
