@@ -546,12 +546,11 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                               height: '80px'
                             }}
                           >
-                            <h4 className="text-sm font-light text-center font-sans px-2 leading-tight break-words overflow-hidden" style={{ 
+                            <h4 className="text-sm font-light text-center font-sans px-2 leading-tight overflow-hidden" style={{ 
                               color: textColor,
-                              fontSize: '14px',
+                              fontSize: option.text.length > 15 ? '12px' : option.text.length > 10 ? '13px' : '14px',
                               lineHeight: '1.3',
-                              wordBreak: 'break-word',
-                              hyphens: 'auto'
+                              wordBreak: 'keep-all'
                             }}>{option.text}</h4>
                           </div>
                         </div>
@@ -695,12 +694,11 @@ const StackBuilder = ({ selectedDocument = { id: "button-1" }, onNext = () => {}
                 height: '80px'
               }}
             >
-              <div className="text-center text-sm font-bold px-2 leading-tight break-words overflow-hidden" style={{ 
+              <div className="text-center text-sm font-bold px-2 leading-tight overflow-hidden" style={{ 
                 color: randomizedOptions.find(opt => opt.id === touchedItem)?.assignedTextColor || '#80AEEE',
-                fontSize: '14px',
+                fontSize: (randomizedOptions.find(opt => opt.id === touchedItem)?.text?.length || 0) > 15 ? '12px' : (randomizedOptions.find(opt => opt.id === touchedItem)?.text?.length || 0) > 10 ? '13px' : '14px',
                 lineHeight: '1.3',
-                wordBreak: 'break-word',
-                hyphens: 'auto'
+                wordBreak: 'keep-all'
               }}>
                 {randomizedOptions.find(opt => opt.id === touchedItem)?.text || 'Dragging...'}
               </div>
